@@ -1,8 +1,37 @@
-import React from 'react';
+// HomeScreen.js
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; 
+import { Ionicons } from '@expo/vector-icons';
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation, route }) => {
+  const filter = route.params?.filter || '';
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleFilterChange = (newFilter) => {
+    switch (newFilter) {
+      case 'author':
+        setSearchQuery('Autor: ');
+        break;
+      case 'title':
+        setSearchQuery('Título: ');
+        break;
+      case 'publisher':
+        setSearchQuery('Editora: ');
+        break;
+      default:
+        setSearchQuery('');
+    }
+  };
+
+  React.useEffect(() => {
+    handleFilterChange(filter);
+  }, [filter]);
+
+  // Função para lidar com a navegação para a tela de filtro
+  const goToFilterScreen = () => {
+    navigation.navigate('Filter');
+  };
+
   return (
     <View style={{ flex: 1 }}>
       {/* Header */}
@@ -15,18 +44,21 @@ const HomeScreen = () => {
           <TextInput
             style={{ flex: 1, height: 40, borderWidth: 1, borderColor: 'gray', paddingHorizontal: 10 }}
             placeholder="Buscar livro..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
           />
-          <TouchableOpacity style={{ padding: 10 }}>
+          <TouchableOpacity style={{ padding: 10 }} onPress={goToFilterScreen}>
             <Ionicons name="filter" size={24} color="black" />
           </TouchableOpacity>
         </View>
       </View>
-      
+
       {/* Conteúdo da tela */}
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Text>Listagem de anúncios</Text>
+
       </View>
-      
+
       {/* Footer */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.footerItem}>
@@ -48,7 +80,7 @@ const HomeScreen = () => {
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   header: {
