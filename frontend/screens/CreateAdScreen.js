@@ -11,7 +11,28 @@ const CreateAdScreen = ({ navigation }) => {
   const [cep, setCep] = useState('');
   const [valor, setValor] = useState('');
 
+  const getCoordinatesFromCep = async (cep) => {
+    try {
+      const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${cep}&key=AIzaSyA1NpCG981LWtO_aKveoXqjVR8H6xfrGfo`);
+      if (response.data.results.length > 0) {
+        const { lat, lng } = response.data.results[0].geometry.location;
+        return { latitude: lat, longitude: lng };
+      } else {
+        return null; // Caso não encontre resultados
+      }
+    } catch (error) {
+      console.error('Erro ao obter coordenadas:', error);
+      return null;
+    }
+  };
+
   const criarAnuncio = async () => {
+    //Obter coordenadas a partir do Cep
+    const coordinates = await fetchCoordinates(cep);
+    if (!coordinates) {
+      Alert.alert('Erro', 'CEP inválido ou não encontrado. Verifique o CEP informado.');
+      return;
+    }
     const livro = {
       titulo: titulo,
       autor: autor,
