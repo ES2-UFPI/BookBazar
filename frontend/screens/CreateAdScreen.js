@@ -13,7 +13,7 @@ const CreateAdScreen = ({ navigation }) => {
 
   const getCoordinatesFromCep = async (cep) => {
     try {
-      const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${cep}&key=AIzaSyA1NpCG981LWtO_aKveoXqjVR8H6xfrGfo`);
+      const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${cep}&key=CHAVE_API`);
       if (response.data.results.length > 0) {
         const { lat, lng } = response.data.results[0].geometry.location;
         return { latitude: lat, longitude: lng };
