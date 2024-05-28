@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { StatusBar } from 'expo-status-bar';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { ListItem } from 'react-native-elements';
 import axios from 'axios';
 
 const HomeScreen = ({ navigation, route }) => {
@@ -26,7 +28,7 @@ const HomeScreen = ({ navigation, route }) => {
   };
 
   const goToCreateAdScreen = () => {
-    navigation.navigate('Anunciar Livro');
+    navigation.navigate('CreateAd');
   };
 
   const fetchSearchResults = async () => {
@@ -54,17 +56,24 @@ const HomeScreen = ({ navigation, route }) => {
   };
 
   const renderResultItem = ({ item }) => (
-    <TouchableOpacity onPress={() => navigation.navigate('DetalhesAnuncio', { id: item.id_anuncio })}>
-      <View style={styles.resultItem}>
-        <View style={styles.imagePlaceholder} />
-        <Text style={styles.resultTitle}>{item.titulo}</Text>
-        <Text>R${item.valor}</Text>
-      </View>
-    </TouchableOpacity>
+    <ListItem
+        key={book.id_anuncio}
+        bottomDivider
+        >
+        <View style={styles.resultItem}>
+          <View style={styles.imagePlaceholder} />
+          <Text numberOfLines={1} style={styles.resultTitle}>{book.name}</Text>
+          <Text>R${book.valor}</Text>
+          <TouchableOpacity style={styles.btnCriarAnuncio} onPress={() => navigation.navigate('ViewBook', book)}>
+            <Text style={{color:'white', fontSize:15}}>Comprar</Text>
+          </TouchableOpacity>
+        </View>
+      </ListItem>
   );
 
   return (
     <View style={{ flex: 1 }}>
+      <StatusBar hidden />
       <View style={styles.header}>
         <Image
           source={require('../assets/logo.jpg')}
@@ -94,16 +103,15 @@ const HomeScreen = ({ navigation, route }) => {
             data={results}
             renderItem={renderResultItem}
             keyExtractor={(item) => item.id_anuncio.toString()}
-            numColumns={2} // Show in two columns
-            contentContainerStyle={styles.flatListContent}
+            numColumns={2}
           />
         )}
       </View>
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.footerItem}>
-          <Ionicons name="home" size={24} color="black" />
-          <Text style={styles.footerText}>Início</Text>
+          <Ionicons name="home" size={24} color="#00009C" />
+          <Text style={styles.footerTextSelected}>Início</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.footerItem} onPress={goToCreateAdScreen}>
           <Ionicons name="add-circle-outline" size={24} color="black" />
@@ -128,10 +136,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: 'lightgray',
   },
+
   searchBar: {
     flex: 1,
     flexDirection: 'row',
@@ -141,19 +150,34 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
   },
+
   searchInput: {
     flex: 1,
     height: 40,
     paddingHorizontal: 10,
   },
+
   searchButton: {
     padding: 10,
     borderLeftWidth: 1,
     borderLeftColor: 'gray',
   },
+
   filterButton: {
     padding: 10,
   },
+
+  btnCriarAnuncio: {
+    width: "50%",
+    height: 40,
+    marginTop: 10,
+    backgroundColor: 'blue',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderRadius: 10,
+  },
+
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -162,15 +186,26 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
   },
+
   footerItem: {
     alignItems: 'center',
   },
+
   footerText: {
     marginTop: 5,
-    fontSize: 12,
+    fontSize: 15,
+    fontWeight: 'bold',
   },
+
+  footerTextSelected: {
+    marginTop: 5,
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#00009C',
+  },
+
   resultItem: {
-    width: 150, // Fixed width for all ad items
+    width: 163, // Fixed width for all ad items
     backgroundColor: 'white',
     padding: 10,
     borderRadius: 8,
@@ -179,21 +214,19 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Center items horizontally
     margin: 5, // Margin between grid items
   },
+
   resultTitle: {
     fontWeight: 'bold',
     fontSize: 16,
     marginTop: 10, // Space above title
   },
+
   imagePlaceholder: {
     width: '100%', // Width occupying all available space
     height: 120, // Fixed height for image placeholder space
     backgroundColor: '#f0f0f0', // Background color to indicate reserved space
     marginBottom: 10, // Space below image
     borderRadius: 8, // Rounded border
-  },
-  flatListContent: {
-    paddingHorizontal: 10,
-    paddingBottom: 10,
   },
 });
 

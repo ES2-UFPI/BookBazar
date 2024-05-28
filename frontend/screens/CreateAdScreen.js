@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, View, TouchableOpacity, Alert } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 
 const CreateAdScreen = ({ navigation }) => {
@@ -65,78 +67,97 @@ const CreateAdScreen = ({ navigation }) => {
     }
   };
 
+  const goToHomeScreen = () => {
+    navigation.navigate('Home');
+  };
+
   return (
     <View style={estilo.container}>
-      <Text style={estilo.nomeRef}>Título: </Text>
-      <TextInput 
-        style={estilo.entrada} 
-        onChangeText={titulo => setTitulo(titulo)} 
-        value={titulo}
-      />
+      <StatusBar hidden />
+      <View style={estilo.pagAnuncio}>
+        <Text style={estilo.nomeRef}>Título: </Text>
+        <TextInput style={estilo.entrada} onChangeText={titulo=>setTitulo(titulo)} value={titulo} />
 
-      <Text style={estilo.nomeRef}>Autor: </Text>
-      <TextInput 
-        style={estilo.entrada} 
-        onChangeText={autor => setAutor(autor)} 
-        value={autor}
-      />
+        <Text style={estilo.nomeRef}>Autor: </Text>
+        <TextInput style={estilo.entrada} onChangeText={autor=>setAutor(autor)} value={autor} />
 
-      <Text style={estilo.nomeRef}>Editora: </Text>
-      <TextInput 
-        style={estilo.entrada} 
-        onChangeText={editora => setEditora(editora)} 
-        value={editora}
-      />
+        <Text style={estilo.nomeRef}>Editora: </Text>
+        <TextInput style={estilo.entrada} onChangeText={editora=>setEditora(editora)} value={editora} />
 
-      <Text style={estilo.nomeRef}>Ano de Impressão: </Text>
-      <TextInput 
-        style={estilo.entrada} 
-        keyboardType="numeric"
-        onChangeText={anoImpressao => setAnoImpressao(anoImpressao)} 
-        value={anoImpressao}
-      />
+        <Text style={estilo.nomeRef}>Ano de Impressão: </Text>
+        <TextInput
+          style={estilo.entrada}
+          keyboardType="numeric"
+          onChangeText={anoImpressao=>setAnoImpressao(anoImpressao)}
+          value={anoImpressao}
+        />
 
-      <Text style={estilo.nomeRef}>Condição: </Text>
-      <TextInput 
-        style={estilo.entrada} 
-        onChangeText={condicao => setCondicao(condicao)} 
-        value={condicao}
-      />
+        <Text style={estilo.nomeRef}>Condição: </Text>
+        <TextInput style={estilo.entrada} onChangeText={condicao => setCondicao(condicao)} value={condicao} />
 
-      <Text style={estilo.nomeRef}>CEP do Anunciante: </Text>
-      <TextInput 
-        style={estilo.entrada} 
-        onChangeText={cep => setCep(cep)} 
-        value={cep}
-      />
+        <Text style={estilo.nomeRef}>CEP do Anunciante: </Text>
+        <TextInput
+          style={estilo.entrada}
+          keyboardType="numeric"
+          onChangeText={cep => setCep(cep)}
+          value={cep}
+        />
 
-      <Text style={estilo.nomeRef}>Valor: </Text>
-      <TextInput 
-        style={estilo.entrada} 
-        keyboardType="numeric"
-        onChangeText={valor => setValor(valor)} 
-        value={valor}
-      />
+        <Text style={estilo.nomeRef}>Valor: </Text>
+        <TextInput 
+          style={estilo.entrada} 
+          keyboardType="numeric"
+          onChangeText={valor => setValor(valor)} 
+          value={valor}
+        />
 
-      <TouchableOpacity style={estilo.btnCriarAnuncio} onPress={criarAnuncio}>
-        <Text style={{ color: 'white', fontSize: 25 }}>Criar Anúncio</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={estilo.btnCriarAnuncio} onPress={()=>criarAnuncio()}>
+            <Text style={{color:'white', fontSize:20, fontWeight: 'bold'}}>Criar Anúncio</Text>
+        </TouchableOpacity>
+      </View>
+      
+      <View style={estilo.footer}>
+        <TouchableOpacity style={estilo.footerItem} onPress={goToHomeScreen}>
+          <Ionicons name="home" size={24} color="black" />
+          <Text style={estilo.footerText}>Início</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={estilo.footerItem}>
+          <Ionicons name="add-circle-outline" size={24} color="#00009C" />
+          <Text style={estilo.footerTextSelected}>Anunciar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={estilo.footerItem}>
+          <Ionicons name="chatbubble-outline" size={24} color="black" />
+          <Text style={estilo.footerText}>Chat</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={estilo.footerItem}>
+          <Ionicons name="menu-outline" size={24} color="black" />
+          <Text style={estilo.footerText}>Menu</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const estilo = StyleSheet.create({
-  container: {
+ container: {
     flex: 1,
     backgroundColor: '#FFF',
-    padding: 15,
+    alignItems: 'left',
+    justifyContent: 'left',
   },
+
+  pagAnuncio: {
+    padding: 10,
+  },
+
   nomeRef: {
     marginTop: 10,
     marginBottom: 5,
     paddingLeft: 8,
-    fontSize: 20,
+    fontSize: 15,
+    fontWeight: 'bold',
   },
+
   entrada: {
     width: "100%",
     height: 40,
@@ -144,19 +165,47 @@ const estilo = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     paddingLeft: 10,
-    fontSize: 20,
+    fontSize: 15,
   },
+
   btnCriarAnuncio: {
-    width: "100%",
+    width: "50%",
+    marginLeft: 100,
     height: 40,
     marginTop: 10,
-    backgroundColor: 'black',
+    backgroundColor: 'blue',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderRadius: 10,
   },
-  
+
+  footer: {
+    marginTop: 139,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: 'lightgray',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+
+  footerItem: {
+    alignItems: 'center',
+  },
+
+  footerText: {
+    marginTop: 5,
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+
+  footerTextSelected: {
+    marginTop: 5,
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#00009C',
+  },
 });
 
 export default CreateAdScreen;
