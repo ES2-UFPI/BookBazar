@@ -5,17 +5,18 @@ const FilterScreen = ({ navigation }) => {
   const [selectedFilter, setSelectedFilter] = useState('');
 
   const applyFilter = () => {
-    if (selectedFilter) {
-      navigation.navigate('Home', { filter: selectedFilter });
-    } else {
-      navigation.navigate('Home');
-    }
+    navigation.navigate('Home', { filter: selectedFilter });
+  };
+
+  const clearFilter = () => {
+    setSelectedFilter('');
+    navigation.navigate('Home', { filter: '' });
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Selecione um filtro:</Text>
-      
+      <Text style={styles.label}>Pesquisar por:</Text>
+
       <TouchableOpacity
         style={[
           styles.button,
@@ -49,6 +50,10 @@ const FilterScreen = ({ navigation }) => {
       <TouchableOpacity style={styles.applyButton} onPress={applyFilter}>
         <Text style={styles.applyButtonText}>Aplicar Filtro</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity style={styles.clearButton} onPress={clearFilter}>
+        <Text style={styles.clearButtonText}>Limpar Filtro</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -81,6 +86,16 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   applyButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  clearButton: {
+    backgroundColor: 'red',
+    padding: 15,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  clearButtonText: {
     color: 'white',
     fontSize: 16,
   },

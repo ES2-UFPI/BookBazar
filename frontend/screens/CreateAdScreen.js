@@ -11,9 +11,9 @@ const CreateAdScreen = ({ navigation }) => {
   const [cep, setCep] = useState('');
   const [valor, setValor] = useState('');
 
-  const getCoordinatesFromCep = async (cep) => {
+  getCoordinatesFromCep = async (cep) => {
     try {
-      const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${cep}&key=AIzaSyA1NpCG981LWtO_aKveoXqjVR8H6xfrGfo`);
+      const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${cep}&key=AIzaSyCVXRKOYXbCLJhCuKi_rPN6UQ-Iqez2iIA`);
       if (response.data.results.length > 0) {
         const { lat, lng } = response.data.results[0].geometry.location;
         return { latitude: lat, longitude: lng };
@@ -27,12 +27,21 @@ const CreateAdScreen = ({ navigation }) => {
   };
 
   const criarAnuncio = async () => {
-    //Obter coordenadas a partir do Cep
-    const coordinates = await fetchCoordinates(cep);
+    // Obter coordenadas a partir do Cep
+    const coordinates = await getCoordinatesFromCep(cep);
+    console.log(coordinates)
     if (!coordinates) {
       Alert.alert('Erro', 'CEP inválido ou não encontrado. Verifique o CEP informado.');
       return;
     }
+
+    const roundTo5Decimals = (num) => {
+      return Math.round(num * 100000) / 100000; // 100000 = 10^5, arredonda para 5 casas decimais
+    };
+    
+    const roundedLatitude = roundTo5Decimals(coordinates.latitude);
+    const roundedLongitude = roundTo5Decimals(coordinates.longitude);
+  
     const livro = {
       titulo: titulo,
       autor: autor,
@@ -41,10 +50,11 @@ const CreateAdScreen = ({ navigation }) => {
       cep_anuncio: cep,
       ano_impressao: parseInt(anoImpressao),
       condicao: condicao,
+      latitude: roundedLatitude,
+      longitude: roundedLongitude,
     };
-
     try {
-      const response = await axios.post('http://servidor/api/cadastro/', livro);
+      const response = await axios.post('http://127.0.0.1:8000/api/anunciar/', livro);
       if (response.status === 201) {
         Alert.alert('Sucesso', 'Anúncio criado com sucesso!');
         navigation.navigate('Home');
@@ -146,6 +156,7 @@ const estilo = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
   },
+  
 });
 
 export default CreateAdScreen;
