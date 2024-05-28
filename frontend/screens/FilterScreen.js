@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { StatusBar } from 'expo-status-bar';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 const FilterScreen = ({ navigation }) => {
@@ -15,6 +16,7 @@ const FilterScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar hidden />
       <Text style={styles.label}>Pesquisar por:</Text>
 
       <TouchableOpacity
