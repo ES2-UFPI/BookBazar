@@ -13,16 +13,16 @@ class Anuncio(models.Model):
     titulo = models.CharField(db_column='Titulo', max_length=255)  # Field name made lowercase.
     autor = models.CharField(db_column='Autor', max_length=255)  # Field name made lowercase.
     editora = models.CharField(db_column='Editora', max_length=255)  # Field name made lowercase.
-    edicao = models.IntegerField(db_column='Edicao')  # Field name made lowercase.
-    genero = models.CharField(db_column='Genero', max_length=255)  # Field name made lowercase.
-    idioma = models.CharField(db_column='Idioma', max_length=255)  # Field name made lowercase.
-    cpf_vendedor = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='CPF_Vendedor')  # Field name made lowercase.
+    edicao = models.IntegerField(db_column='Edicao', blank=True, null=True)  # Field name made lowercase.
+    genero = models.CharField(db_column='Genero', max_length=255, null=True, blank=True)  # Field name made lowercase.
+    idioma = models.CharField(db_column='Idioma', max_length=255, null=True, blank=True)  # Field name made lowercase.
+    cpf_vendedor = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='CPF_Vendedor', null=True, blank=True)  # Field name made lowercase.
     valor = models.DecimalField(db_column='Valor', max_digits=10, decimal_places=2)  # Field name made lowercase.
-    cidade = models.CharField(db_column='Cidade', max_length=255)  # Field name made lowercase.
+    cidade = models.CharField(db_column='Cidade', max_length=255, null=True, blank=True)  # Field name made lowercase.
     cep_anuncio = models.CharField(db_column='CEP_Anuncio', max_length=8)  # Field name made lowercase.
     latitude = models.DecimalField(db_column='Latitude', max_digits=7, decimal_places=5)  # Field name made lowercase.
     longitude = models.DecimalField(db_column='Longitude', max_digits=7, decimal_places=5)  # Field name made lowercase.
-    descricao = models.CharField(db_column='Descricao', max_length=1024)  # Field name made lowercase.
+    descricao = models.CharField(db_column='Descricao', max_length=1024, null=True, blank=True)  # Field name made lowercase.
     ano_impressao = models.IntegerField(db_column='Ano_Impressao')  # Field name made lowercase.
     condicao = models.CharField(db_column='Condicao', max_length=255)  # Field name made lowercase.
 
