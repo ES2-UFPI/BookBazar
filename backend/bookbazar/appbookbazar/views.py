@@ -18,3 +18,28 @@ def Cadastrar_Anuncio(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def Pesquisar_Anuncios(request):
+    search_query = request.query_params.get('search', '')
+
+    if search_query:
+        filter_type = request.query_params.get('filter', '')
+
+        if filter_type == 'author':
+            anuncios = Anuncio.objects.filter(autor__icontains=search_query)
+        elif filter_type == 'title':
+            anuncios = Anuncio.objects.filter(titulo__icontains=search_query)
+        elif filter_type == 'publisher':
+            anuncios = Anuncio.objects.filter(editora__icontains=search_query)
+        else:
+            anuncios = Anuncio.objects.filter(
+                titulo__icontains=search_query) | Anuncio.objects.filter(
+                autor__icontains=search_query) | Anuncio.objects.filter(
+                editora__icontains=search_query)
+
+    else:
+        anuncios = Anuncio.objects.none()  # Retorna uma queryset vazia se não houver search_query
+
+    serializer = Pesquisa_Serializer(anuncios, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
