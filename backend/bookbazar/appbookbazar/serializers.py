@@ -2,10 +2,17 @@ from rest_framework import serializers
 from appbookbazar.models import *
 
 class Cadastrar_Anuncio_Serializer(serializers.ModelSerializer):
+
     class Meta:
         model = Anuncio
-        fields = ['titulo', 'autor', 'editora', 'edicao', 'genero', 'idioma', 'cpf_vendedor', 'valor', 'cidade', 'cep_anuncio', 'latitude', 'longitude', 'descricao', 'ano_impressao', 'condicao']
+        fields = [
+            'titulo', 'autor', 'editora', 'edicao', 'genero', 'idioma',
+            'cpf_vendedor', 'valor', 'cidade', 'cep_anuncio', 'latitude',
+            'longitude', 'descricao', 'ano_impressao', 'condicao'
+        ]
 
+    def create(self, validated_data):
+        return super().create(validated_data)
 class Visualizar_Anuncio_Serializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Anuncio

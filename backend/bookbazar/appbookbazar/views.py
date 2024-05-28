@@ -43,3 +43,14 @@ def Pesquisar_Anuncios(request):
 
     serializer = Pesquisa_Serializer(anuncios, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def Visualizar_Anuncio(request):
+    id_anuncio = request.GET.get('id_anuncio', None)
+
+    anuncio = Anuncio.objects.all()
+
+    anuncio = anuncio.filter(id_anuncio=id_anuncio)
+
+    serializer = Visualizar_Anuncio_Serializer(anuncio, many=True, context={'request':request})
+    return Response(serializer.data)
