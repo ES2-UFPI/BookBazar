@@ -57,14 +57,14 @@ const HomeScreen = ({ navigation, route }) => {
 
   const renderResultItem = ({ item }) => (
     <ListItem
-        key={book.id_anuncio}
+        key={item.id_anuncio}
         bottomDivider
         >
         <View style={styles.resultItem}>
           <View style={styles.imagePlaceholder} />
-          <Text numberOfLines={1} style={styles.resultTitle}>{book.name}</Text>
-          <Text>R${book.valor}</Text>
-          <TouchableOpacity style={styles.btnCriarAnuncio} onPress={() => navigation.navigate('ViewBook', book)}>
+          <Text numberOfLines={1} style={styles.resultTitle}>{item.name}</Text>
+          <Text>R${item.valor}</Text>
+          <TouchableOpacity style={styles.btnCriarAnuncio} onPress={() => navigation.navigate('ViewBook', item)}>
             <Text style={{color:'white', fontSize:15}}>Comprar</Text>
           </TouchableOpacity>
         </View>
