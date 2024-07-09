@@ -25,4 +25,4 @@ jobs:
         pip install -r backend/bookbazar/requirements.txt
     - name: Run Tests
       run: |
-        python manage.py test
+        python backend/bookbazar/manage.py test
