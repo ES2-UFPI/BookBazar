@@ -36,6 +36,11 @@ const HomeScreen = ({ navigation, route }) => {
       if (filter) {
         params.filter = filter;
       }
+
+      const { coords } = await Location.getCurrentPositionAsync({});
+      params.latitude_usuario = coords.latitude;
+      params.longitude_usuario = coords.longitude;
+
       const response = await axios.get('http://127.0.0.1:8000/api/pesquisar/', { params });
       setResults(response.data);
     } catch (error) {
@@ -59,6 +64,7 @@ const HomeScreen = ({ navigation, route }) => {
         <View style={styles.imagePlaceholder} />
         <Text style={styles.resultTitle}>{item.titulo}</Text>
         <Text>R${item.valor}</Text>
+        {item.distancia_usuario && <Text>{(item.distancia_usuario / 1000).toFixed(2)} km</Text>}
       </View>
     </TouchableOpacity>
   );
