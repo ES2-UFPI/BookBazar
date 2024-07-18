@@ -13,10 +13,19 @@ class Cadastrar_Anuncio_Serializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return super().create(validated_data)
+    
 class Visualizar_Anuncio_Serializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Anuncio
-        fields = ['id_anuncio', 'titulo', 'autor', 'editora', 'edicao', 'genero', 'idioma', 'cpf_vendedor', 'valor', 'cidade', 'descricao', 'ano_impressao', 'condicao']
+        fields = ['id_anuncio', 'titulo', 'autor', 'editora', 'edicao', 'genero', 'idioma', 'cpf_vendedor', 'valor', 'cidade', 'descricao', 'ano_impressao', 'condicao', 'distancia_usuario']
+
+    def get_distancia_usuario(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:  
+            latitude_usuario = request.user.latitude  
+            longitude_usuario = request.user.longitude 
+            return obj.calcular_distancia(latitude_usuario, longitude_usuario)
+        return None
 
 class Pesquisa_Serializer(serializers.HyperlinkedModelSerializer):
     class Meta:

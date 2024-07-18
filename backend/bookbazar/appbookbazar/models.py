@@ -6,7 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-
+from django.contrib.gis.geos import Point
 
 class Anuncio(models.Model):
     id_anuncio = models.AutoField(db_column='ID_Anuncio', primary_key=True)  # Field name made lowercase.
@@ -26,6 +26,12 @@ class Anuncio(models.Model):
     ano_impressao = models.IntegerField(db_column='Ano_Impressao')  # Field name made lowercase.
     condicao = models.CharField(db_column='Condicao', max_length=255)  # Field name made lowercase.
 
+    def calcular_distancia(self, latitude_usuario, longitude_usuario):
+        ponto_anuncio = Point(float(self.latitude), float(self.longitude))
+        ponto_usuario = Point(float(latitude_usuario), float(longitude_usuario))
+        distancia = ponto_anuncio.distance(ponto_usuario) * 100  # Distância em metros
+        return round(distancia, 2)
+    
     class Meta:
         managed = False
         db_table = 'anuncio'
