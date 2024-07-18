@@ -11,6 +11,7 @@ urlpatterns = [
     path('api/anunciar/', Cadastrar_Anuncio),
     path('api/visualizar/', Visualizar_Anuncio),
     path('api/pesquisar/', Pesquisar_Anuncios),
+    path('chat/', chatPage),
     path('', include(router.urls)),
     path('api-auth', include('rest_framework.urls')),
 ]

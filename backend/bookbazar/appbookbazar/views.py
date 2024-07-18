@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from appbookbazar.serializers import *
 from appbookbazar.models import *       
-from appbookbazar.utils import calcula_distancia
+from django.shortcuts import render
 class Usuario_ViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
 
@@ -54,3 +54,6 @@ def Visualizar_Anuncio(request):
 
     serializer = Visualizar_Anuncio_Serializer(anuncio, many=True, context={'request':request})
     return Response(serializer.data)
+
+def chatPage(request):
+    return render(request, "appbookbazar/chatPage.html")
