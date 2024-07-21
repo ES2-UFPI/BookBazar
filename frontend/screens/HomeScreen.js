@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, FlatList } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, FlatList} from 'react-native';
+import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 
@@ -36,10 +37,28 @@ const HomeScreen = ({ navigation, route }) => {
       if (filter) {
         params.filter = filter;
       }
+  
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permissão de localização não concedida');
+        return;
+      }
+      
+      const { coords } = await Location.getCurrentPositionAsync({});
+      if (!coords) {
+        Alert.alert('Erro ao obter a localização');
+        return;
+      }
+  
+      params.latitude_usuario = coords.latitude;
+      params.longitude_usuario = coords.longitude;
+  
       const response = await axios.get('http://127.0.0.1:8000/api/pesquisar/', { params });
+      console.log(response.data);
       setResults(response.data);
     } catch (error) {
       console.error(error);
+      Alert.alert('Erro ao buscar resultados', 'Por favor, tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -59,6 +78,7 @@ const HomeScreen = ({ navigation, route }) => {
         <View style={styles.imagePlaceholder} />
         <Text style={styles.resultTitle}>{item.titulo}</Text>
         <Text>R${item.valor}</Text>
+        {item.distancia !== undefined && <Text style={styles.distancia}>{(item.distancia / 1000).toFixed(2)} km</Text>}
       </View>
     </TouchableOpacity>
   );
@@ -183,6 +203,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     marginTop: 10, // Space above title
+  },
+  distancia: {
+    fontSize: 12,         
+    color: 'green',     
   },
   imagePlaceholder: {
     width: '100%', // Width occupying all available space
