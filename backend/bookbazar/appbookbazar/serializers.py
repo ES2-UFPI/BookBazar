@@ -1,8 +1,7 @@
 from rest_framework import serializers
-from appbookbazar.models import *
+from .models import Anuncio, Usuario, Comentario, Avaliacao, Transacao
 
 class Cadastrar_Anuncio_Serializer(serializers.ModelSerializer):
-
     class Meta:
         model = Anuncio
         fields = [
@@ -13,42 +12,59 @@ class Cadastrar_Anuncio_Serializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return super().create(validated_data)
-    
-class Visualizar_Anuncio_Serializer(serializers.HyperlinkedModelSerializer):
+
+class Visualizar_Anuncio_Serializer(serializers.ModelSerializer):
+    distancia_usuario = serializers.SerializerMethodField()
+
     class Meta:
         model = Anuncio
-        fields = ['id_anuncio', 'titulo', 'autor', 'editora', 'edicao', 'genero', 'idioma', 'cpf_vendedor', 'valor', 'cidade', 'descricao', 'ano_impressao', 'condicao', 'distancia_usuario']
+        fields = [
+            'id_anuncio', 'titulo', 'autor', 'editora', 'edicao', 'genero', 'idioma',
+            'cpf_vendedor', 'valor', 'cidade', 'descricao', 'ano_impressao',
+            'condicao', 'distancia_usuario'
+        ]
 
     def get_distancia_usuario(self, obj):
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:  
-            latitude_usuario = request.user.latitude  
-            longitude_usuario = request.user.longitude 
+        latitude_usuario = self.context.get('latitude_usuario')
+        longitude_usuario = self.context.get('longitude_usuario')
+        if latitude_usuario and longitude_usuario:
             return obj.calcular_distancia(latitude_usuario, longitude_usuario)
         return None
 
-class Pesquisa_Serializer(serializers.HyperlinkedModelSerializer):
+class Pesquisa_Serializer(serializers.ModelSerializer):
+    distancia = serializers.SerializerMethodField()
+
     class Meta:
         model = Anuncio
-        fields = ['id_anuncio', 'titulo', 'valor', 'latitude', 'longitude'] 
+        fields = ['id_anuncio', 'titulo', 'valor', 'latitude', 'longitude', 'distancia']
 
-class Usuario_Serializer(serializers.HyperlinkedModelSerializer):
+    def get_distancia(self, obj):
+        request = self.context.get('request')
+        if request:
+            latitude_usuario = float(request.query_params.get('latitude_usuario', 0))
+            longitude_usuario = float(request.query_params.get('longitude_usuario', 0))
+            #print(f"Latitude do usuário: {latitude_usuario}, Longitude do usuário: {longitude_usuario}")
+            distancia = obj.calcular_distancia(latitude_usuario, longitude_usuario)
+            #print(f"Distância calculada: {distancia}")
+            return distancia
+        return None
+
+class Usuario_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = ['cpf_usuario', 'nome', 'data_nascimento', 'telefone', 'email', 'cep']
 
-class Comentario_Serializer(serializers.HyperlinkedModelSerializer):
+class Comentario_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Comentario
         fields = ['id_comentario', 'id_anuncio', 'autor', 'texto']
 
-class Avaliacao_Serializer(serializers.HyperlinkedModelSerializer):
+class Avaliacao_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Avaliacao
-        fields = []
+        fields = ['id_avaliacao', 'usuario_avaliado', 'avaliador', 'estrelas_produto', 'estrelas_vendedor', 'comentario']
 
-class Transacao_Serializer(serializers.HyperlinkedModelSerializer):
+class Transacao_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Transacao
-        fields = []                
-    
+        fields = ['id_transacao', 'cpf_comprador', 'cpf_vendedor', 'id_anuncio']

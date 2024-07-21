@@ -82,13 +82,14 @@ WSGI_APPLICATION = 'bookbazar.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bookbazar',
+        'NAME': 'bookbazar3',
         'USER': 'root',
-        'PASSWORD': '12345678',
-        'HOST': '127.0.0.1',
+        'PASSWORD': '123456La@',
+        'HOST': 'localhost',
         'PORT': '3306'
     }
 }
+
 
 
 # Password validation
