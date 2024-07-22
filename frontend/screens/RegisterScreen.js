@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 
-const UserScreen = ({ navigation }) => {
+const RegisterScreen = ({ navigation }) => {
   const [cpf, setCPF] = useState('');
   const [nome, setNome] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
@@ -42,7 +42,7 @@ const UserScreen = ({ navigation }) => {
       Alert.alert('Erro', 'Confirmar senha deve ter pelo menos 6 caracteres.');
       return false;
     }
-    if (senha != confirmarSenha) {
+    if (senha !== confirmarSenha) {
       Alert.alert('Erro', 'Senhas diferentes.');
       return false;
     }
@@ -57,14 +57,14 @@ const UserScreen = ({ navigation }) => {
     setLoading(true);
 
     const usuario = {
-      cpf: cpf,
+      cpf_usuario: cpf,
       nome: nome,
-      dataNascimento: dataNascimento,
+      data_nascimento: dataNascimento,
       telefone: telefone,
       email: email,
       senha: senha,
     };
-    axios.post('...', usuario)
+    axios.post('http://127.0.0.1:8000/cadastrarusuario/', usuario)
       .then(response => {
         console.log('Sucesso:', response.data);
         Alert.alert('Cadastro de usuário realizado com sucesso!');
@@ -83,27 +83,27 @@ const UserScreen = ({ navigation }) => {
     <View style={estilo.container}>
       <View style={estilo.pagCadastro}>
         <Text style={estilo.nomeRef}>CPF: </Text>
-        <TextInput style={estilo.entrada} keyboardType="numeric" onChangeText={cpf=>setCPF(cpf)} value={cpf} />
+        <TextInput style={estilo.entrada} keyboardType="numeric" onChangeText={setCPF} value={cpf} />
 
         <Text style={estilo.nomeRef}>Nome: </Text>
-        <TextInput style={estilo.entrada} onChangeText={nome=>setNome(nome)} value={nome} />
+        <TextInput style={estilo.entrada} onChangeText={setNome} value={nome} />
 
         <Text style={estilo.nomeRef}>Data de Nascimento: </Text>
-        <TextInput style={estilo.entrada} onChangeText={dataNascimento=>setDataNascimento(dataNascimento)} value={dataNascimento} />
+        <TextInput style={estilo.entrada} onChangeText={setDataNascimento} value={dataNascimento} />
 
         <Text style={estilo.nomeRef}>Telefone: </Text>
-        <TextInput style={estilo.entrada} keyboardType="phone-pad" onChangeText={telefone=>setTelefone(telefone)} value={telefone} />
+        <TextInput style={estilo.entrada} keyboardType="phone-pad" onChangeText={setTelefone} value={telefone} />
 
         <Text style={estilo.nomeRef}>Email: </Text>
-        <TextInput style={estilo.entrada} keyboardType="email-address" onChangeText={email=>setEmail(email)} value={email} />
+        <TextInput style={estilo.entrada} keyboardType="email-address" onChangeText={setEmail} value={email} />
         
         <Text style={estilo.nomeRef}>Senha: </Text>
-        <TextInput style={estilo.entrada} secureTextEntry onChangeText={senha=>setSenha(senha)} value={senha} />
+        <TextInput style={estilo.entrada} secureTextEntry onChangeText={setSenha} value={senha} />
 
         <Text style={estilo.nomeRef}>Confirmar Senha: </Text>
-        <TextInput style={estilo.entrada} secureTextEntry onChangeText={confirmarSenha=>setConfirmarSenha(confirmarSenha)} value={confirmarSenha} />
+        <TextInput style={estilo.entrada} secureTextEntry onChangeText={setConfirmarSenha} value={confirmarSenha} />
 
-        <TouchableOpacity style={estilo.btnCadastrarUsuario} disabled={loading} onPress={()=>cadastrarUsuario()}>
+        <TouchableOpacity style={estilo.btnCadastrarUsuario} disabled={loading} onPress={cadastrarUsuario}>
             <Text style={{color:'white', fontSize:20, fontWeight: 'bold'}}>Cadastrar</Text>
         </TouchableOpacity>
       </View>
@@ -154,4 +154,4 @@ const estilo = StyleSheet.create({
   },
 });
 
-export default UserScreen;
+export default RegisterScreen;

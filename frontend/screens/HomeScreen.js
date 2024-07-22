@@ -27,7 +27,7 @@ const HomeScreen = ({ navigation, route }) => {
   };
 
   const goToCreateAdScreen = () => {
-    navigation.navigate('Anunciar Livro');
+    navigation.navigate('CreateAd');
   };
 
   const fetchSearchResults = async () => {
