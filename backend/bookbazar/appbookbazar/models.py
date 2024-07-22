@@ -6,6 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from geopy.distance import geodesic
 
 
 class Anuncio(models.Model):
@@ -25,6 +26,12 @@ class Anuncio(models.Model):
     descricao = models.CharField(db_column='Descricao', max_length=1024)  # Field name made lowercase.
     ano_impressao = models.IntegerField(db_column='Ano_Impressao')  # Field name made lowercase.
     condicao = models.CharField(db_column='Condicao', max_length=255)  # Field name made lowercase.
+
+    def calcular_distancia(self, latitude_usuario, longitude_usuario):
+        ponto_anuncio = (self.latitude, self.longitude)
+        ponto_usuario = (latitude_usuario, longitude_usuario)
+        distancia = geodesic(ponto_anuncio, ponto_usuario).meters
+        return round(distancia, 2)
 
     class Meta:
         managed = False
