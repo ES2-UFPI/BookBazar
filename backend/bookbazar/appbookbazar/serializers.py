@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth.hashers import make_password
 from .models import Anuncio, Usuario, Comentario, Avaliacao, Transacao
 
 class Cadastrar_Anuncio_Serializer(serializers.ModelSerializer):
@@ -52,7 +53,12 @@ class Pesquisa_Serializer(serializers.ModelSerializer):
 class Usuario_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['cpf_usuario', 'nome', 'data_nascimento', 'telefone', 'email', 'cep']
+        fields = ['cpf_usuario', 'nome', 'data_nascimento', 'telefone', 'email', 'senha']
+
+        def create(self, validated_data):
+        # Hash da senha antes de salvar
+            validated_data['senha'] = make_password(validated_data['senha'])
+            return super().create(validated_data)
 
 class Comentario_Serializer(serializers.ModelSerializer):
     class Meta:

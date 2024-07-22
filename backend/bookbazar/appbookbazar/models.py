@@ -71,7 +71,7 @@ class Usuario(models.Model):
     data_nascimento = models.DateField(db_column='Data_nascimento')
     telefone = models.CharField(db_column='Telefone', max_length=13)
     email = models.CharField(db_column='Email', max_length=255)
-    cep = models.CharField(db_column='CEP', max_length=8)
+    senha = models.CharField(db_column='Senha', max_length=32)
 
     class Meta:
         managed = False
