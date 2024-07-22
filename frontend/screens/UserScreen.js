@@ -1,53 +1,109 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-//import axios from 'axios';
+import axios from 'axios';
 
 const UserScreen = ({ navigation }) => {
-  const [nome, setNome] = useState('');
   const [cpf, setCPF] = useState('');
+  const [nome, setNome] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
+  const [telefone, setTelefone] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  const validarEntrada = () => {
+    if (!cpf || cpf.length !== 11) {
+      Alert.alert('Erro', 'CPF deve ter 11 dígitos.');
+      return false;
+    }
+    if (!nome) {
+      Alert.alert('Erro', 'Nome é obrigatório.');
+      return false;
+    }
+    if (!dataNascimento) {
+      Alert.alert('Erro', 'Data de nascimento é obrigatória.');
+      return false;
+    }
+    if (!telefone) {
+      Alert.alert('Erro', 'Telefone é obrigatório.');
+      return false;
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailPattern.test(email)) {
+      Alert.alert('Erro', 'Email inválido.');
+      return false;
+    }
+    if (!senha || senha.length < 6) {
+      Alert.alert('Erro', 'Senha deve ter pelo menos 6 caracteres.');
+      return false;
+    }
+    if (!confirmarSenha || confirmarSenha.length < 6) {
+      Alert.alert('Erro', 'Confirmar senha deve ter pelo menos 6 caracteres.');
+      return false;
+    }
+    if (senha != confirmarSenha) {
+      Alert.alert('Erro', 'Senhas diferentes.');
+      return false;
+    }
+    return true;
+  };
 
   const cadastrarUsuario = async () => {
+    if (!validarEntrada()) {
+      return;
+    }
+
+    setLoading(true);
+
     const usuario = {
-      nome: nome,
       cpf: cpf,
+      nome: nome,
       dataNascimento: dataNascimento,
+      telefone: telefone,
       email: email,
       senha: senha,
     };
-    try {
-      const response = await axios.post('...', usuario);
-      if (response.status === 201) {
-        Alert.alert('Sucesso', 'Usuário cadastrado com sucesso!');
+    axios.post('...', usuario)
+      .then(response => {
+        console.log('Sucesso:', response.data);
+        Alert.alert('Cadastro de usuário realizado com sucesso!');
         navigation.navigate('Login');
-      }
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Erro', 'Não foi possível realizar o cadastro. Tente novamente.');
-    }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        Alert.alert('Erro', 'Não foi possível realizar o cadastro. Tente novamente.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (
     <View style={estilo.container}>
       <View style={estilo.pagCadastro}>
+        <Text style={estilo.nomeRef}>CPF: </Text>
+        <TextInput style={estilo.entrada} keyboardType="numeric" onChangeText={cpf=>setCPF(cpf)} value={cpf} />
+
         <Text style={estilo.nomeRef}>Nome: </Text>
         <TextInput style={estilo.entrada} onChangeText={nome=>setNome(nome)} value={nome} />
-
-        <Text style={estilo.nomeRef}>CPF: </Text>
-        <TextInput style={estilo.entrada} onChangeText={cpf=>setCPF(cpf)} value={cpf} />
 
         <Text style={estilo.nomeRef}>Data de Nascimento: </Text>
         <TextInput style={estilo.entrada} onChangeText={dataNascimento=>setDataNascimento(dataNascimento)} value={dataNascimento} />
 
+        <Text style={estilo.nomeRef}>Telefone: </Text>
+        <TextInput style={estilo.entrada} keyboardType="phone-pad" onChangeText={telefone=>setTelefone(telefone)} value={telefone} />
+
         <Text style={estilo.nomeRef}>Email: </Text>
-        <TextInput style={estilo.entrada} onChangeText={email=>setEmail(email)} value={email} />
+        <TextInput style={estilo.entrada} keyboardType="email-address" onChangeText={email=>setEmail(email)} value={email} />
         
         <Text style={estilo.nomeRef}>Senha: </Text>
-        <TextInput style={estilo.entrada} onChangeText={senha=>setSenha(senha)} value={senha} />
+        <TextInput style={estilo.entrada} secureTextEntry onChangeText={senha=>setSenha(senha)} value={senha} />
 
-        <TouchableOpacity style={estilo.btnCadastrarUsuario} onPress={()=>cadastrarUsuario()}>
+        <Text style={estilo.nomeRef}>Confirmar Senha: </Text>
+        <TextInput style={estilo.entrada} secureTextEntry onChangeText={confirmarSenha=>setConfirmarSenha(confirmarSenha)} value={confirmarSenha} />
+
+        <TouchableOpacity style={estilo.btnCadastrarUsuario} disabled={loading} onPress={()=>cadastrarUsuario()}>
             <Text style={{color:'white', fontSize:20, fontWeight: 'bold'}}>Cadastrar</Text>
         </TouchableOpacity>
       </View>
