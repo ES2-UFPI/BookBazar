@@ -6,6 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from geopy.distance import geodesic
 
 
 class Anuncio(models.Model):
@@ -25,6 +26,12 @@ class Anuncio(models.Model):
     descricao = models.CharField(db_column='Descricao', max_length=1024)  # Field name made lowercase.
     ano_impressao = models.IntegerField(db_column='Ano_Impressao')  # Field name made lowercase.
     condicao = models.CharField(db_column='Condicao', max_length=255)  # Field name made lowercase.
+
+    def calcular_distancia(self, latitude_usuario, longitude_usuario):
+        ponto_anuncio = (self.latitude, self.longitude)
+        ponto_usuario = (latitude_usuario, longitude_usuario)
+        distancia = geodesic(ponto_anuncio, ponto_usuario).meters
+        return round(distancia, 2)
 
     class Meta:
         managed = False
@@ -124,6 +131,17 @@ class Comentario(models.Model):
         db_table = 'comentario'
 
 
+class Credentials(models.Model):
+    username = models.CharField(primary_key=True, max_length=155)
+    senha = models.CharField(max_length=18)
+    cpf_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='cpf_usuario')
+    email = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='email', to_field='email', related_name='credentials_email_set')
+
+    class Meta:
+        managed = False
+        db_table = 'credentials'
+
+
 class DjangoAdminLog(models.Model):
     action_time = models.DateTimeField()
     object_id = models.TextField(blank=True, null=True)
@@ -171,10 +189,11 @@ class DjangoSession(models.Model):
 
 class Mensagem(models.Model):
     id_mensagem = models.AutoField(primary_key=True)
-    cpf_remetente = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='cpf_remetente')
-    cpf_destino = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='cpf_destino', related_name='mensagem_cpf_destino_set')
+    sender_username = models.ForeignKey(Credentials, models.DO_NOTHING, db_column='sender_username')
+    receiver_username = models.ForeignKey(Credentials, models.DO_NOTHING, db_column='receiver_username', related_name='mensagem_receiver_username_set')
     chat_id = models.IntegerField()
     horario_mensagem = models.DateTimeField()
+    conteudo_mensagem = models.TextField()
 
     class Meta:
         managed = False
@@ -197,7 +216,7 @@ class Usuario(models.Model):
     nome = models.CharField(db_column='Nome', max_length=255)  # Field name made lowercase.
     data_nascimento = models.DateField(db_column='Data_nascimento')  # Field name made lowercase.
     telefone = models.CharField(db_column='Telefone', max_length=13)  # Field name made lowercase.
-    email = models.CharField(db_column='Email', max_length=255)  # Field name made lowercase.
+    email = models.CharField(db_column='Email', unique=True, max_length=255)  # Field name made lowercase.
     cep = models.CharField(db_column='CEP', max_length=8)  # Field name made lowercase.
 
     class Meta:
