@@ -123,7 +123,7 @@ class Avaliacao(models.Model):
 class Comentario(models.Model):
     id_comentario = models.AutoField(db_column='ID_Comentario', primary_key=True)  # Field name made lowercase.
     id_anuncio = models.ForeignKey(Anuncio, models.DO_NOTHING, db_column='ID_Anuncio')  # Field name made lowercase.
-    autor = models.CharField(db_column='Autor', max_length=11)  # Field name made lowercase.
+    autor = models.CharField(db_column='Autor', max_length=155)  # Field name made lowercase.
     texto = models.CharField(db_column='Texto', max_length=1024)  # Field name made lowercase.
 
     class Meta:
