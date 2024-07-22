@@ -25,9 +25,12 @@ def Cadastrar_Anuncio(request):
 @api_view(['GET'])
 def Pesquisar_Anuncios(request):
     search_query = request.query_params.get('search', '')
+    filter_type = request.query_params.get('filter', '')
+
+    latitude_usuario = float(request.query_params.get('latitude_usuario', 0))
+    longitude_usuario = float(request.query_params.get('longitude_usuario', 0))
 
     if search_query:
-        filter_type = request.query_params.get('filter', '')
 
         if filter_type == 'author':
             anuncios = Anuncio.objects.filter(autor__icontains=search_query)
@@ -44,19 +47,21 @@ def Pesquisar_Anuncios(request):
     else:
         anuncios = Anuncio.objects.none()  # Retorna uma queryset vazia se não houver search_query
 
-    serializer = Pesquisa_Serializer(anuncios, many=True)
+    serializer = Pesquisa_Serializer(anuncios, many=True, context={'request':request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def Visualizar_Anuncio(request):
     id_anuncio = request.GET.get('id_anuncio', None)
 
-    anuncio = Anuncio.objects.all()
-
-    anuncio = anuncio.filter(id_anuncio=id_anuncio)
-
-    serializer = Visualizar_Anuncio_Serializer(anuncio, many=True, context={'request':request})
-    return Response(serializer.data)
+    if id_anuncio:
+        try:
+            anuncio = Anuncio.objects.get(id_anuncio=id_anuncio)
+            serializer = Visualizar_Anuncio_Serializer(anuncio, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Anuncio.DoesNotExist:
+            return Response({"error": "Anuncio nao encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    return Response({"error": "ID do Anuncio nao Fornecido"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def chatPage(request):
@@ -96,7 +101,6 @@ def Registrar_Usuario(request):
         'data_nascimento':request.data.get('data_nascimento', None),
         'telefone':request.data.get('telefone', None),
         'email':request.data.get('email', None),
-        'cep':request.data.get('cep', None)
     }
 
     serializer_usuario = Usuario_Serializer(data=user_data)
