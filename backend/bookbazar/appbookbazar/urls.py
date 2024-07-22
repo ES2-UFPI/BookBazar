@@ -11,7 +11,11 @@ urlpatterns = [
     path('api/anunciar/', Cadastrar_Anuncio),
     path('api/visualizar/', Visualizar_Anuncio),
     path('api/pesquisar/', Pesquisar_Anuncios),
-    path('chat/', chatPage),
+    path('api/registrar/', Registrar_Usuario),
+    path('api/login/', Logar_Usuario),
+    path('api/logout/', Logout_Usuario),
+    path('api/checarlogin/', Check_Login),
+    path('<str:sender_username>/<str:receiver_username>/', chatPage, name='chat'),
     path('', include(router.urls)),
     path('api-auth', include('rest_framework.urls')),
 ]

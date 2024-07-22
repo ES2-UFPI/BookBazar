@@ -32,7 +32,7 @@
         var messageInput = document.querySelector(
           "#id_message_send_input"
         ).value;
-        chatSocket.send(JSON.stringify({ message: messageInput, username : "{{request.user.username}}"}));
+        chatSocket.send(JSON.stringify({ conteudo_mensagem: messageInput, username : "{{request.user.username}}"}));
       };
       chatSocket.onmessage = function (e) {
         const data = JSON.parse(e.data);
