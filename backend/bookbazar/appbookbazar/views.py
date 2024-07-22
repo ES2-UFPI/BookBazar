@@ -155,4 +155,27 @@ def Check_Login(request):
         return Response(data, status=status.HTTP_200_OK)
     
     return Response({'error': 'Usuario nao Logado'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def Comentar(request):
+    if request.session.get('isLoggedIn'):
+        serializer = Comentario_Serializer(data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response({'error': 'Erro ao Comentar', 'details': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({'error': 'Usuario nao Logado'}, status=status.HTTP_400_BAD_REQUEST)  
+
+@api_view(['GET'])
+def Visualizar_Comentarios(request):
+    id_anuncio = Comentario.objects.filter(id_anuncio=id_anuncio)
+    comentario_serializer = Comentario_Serializer(id_anuncio, context={'request':request})
+
+    try:
+        return Response(comentario_serializer, status=status.HTTP_200_OK)
+    except:
+        return Response({'erro': 'Erro ao Recuperar Comentarios', 'details': comentario_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
