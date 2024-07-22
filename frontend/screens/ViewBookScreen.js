@@ -5,6 +5,8 @@ import axios from 'axios';
 const ViewBookScreen = ({ route, navigation }) => {
   const { bookId } = route.params;
   const [book, setBook] = useState(null);
+  const [comment, setComment] = useState('');
+  const [comments, setComments] = useState([]);
 
   useEffect(() => {
     const fetchBookDetails = async () => {
@@ -19,6 +21,27 @@ const ViewBookScreen = ({ route, navigation }) => {
 
     fetchBookDetails();
   }, [bookId]);
+
+  const handleAddComment = async () => {
+    if (comment.trim() === '') {
+      Alert.alert('Campo de Comentário Vazio', 'Por favor, digite um comentário ou pergunta.');
+      return;
+    }
+
+    try {
+      const newComment = {
+        book: bookId,
+        author: 'User', // Substitua pelo nome do usuário autenticado
+        text: comment,
+      };
+
+      const response = await axios.post('...', newComment);
+      setComments([...comments, response.data]);
+      setComment('');
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   if (!book) {
     return (
@@ -65,7 +88,31 @@ const ViewBookScreen = ({ route, navigation }) => {
         </View>
       </View>
 
+      <View style={styles.commentsContainer}>
+        <Text style={styles.commentsTitle}>Comentários e Perguntas:</Text>
+        <FlatList
+          data={comments}
+          renderItem={({ item }) => (
+            <View style={styles.commentItem}>
+              <Text style={styles.commentAuthor}>{item.autor}</Text>
+              <Text style={styles.commentText}>{item.comentario}</Text>
+            </View>
+          )}
+          keyExtractor={item => item.id.toString()}
+        />
+      </View>
 
+      <View style={styles.addCommentContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Adicione um comentário ou pergunta..."
+          value={comment}
+          onChangeText={setComment}
+        />
+        <TouchableOpacity style={styles.addButton} onPress={handleAddComment}>
+          <Text style={styles.addButtonText}>Enviar</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
@@ -114,7 +161,62 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#000',
   },
- 
+  commentsContainer: {
+    marginBottom: 20,
+  },
+  commentsTitle: {
+    fontSize: 19,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  commentItem: {
+    backgroundColor: '#f9f9f9',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  commentAuthor: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
+    marginBottom: 5,
+  },
+  commentText: {
+    fontSize: 16,
+    color: '#004a55',
+    marginLeft: 10,
+    textAlign: 'justify',
+    fontStyle: 'italic',
+  },
+  commentType: {
+    fontSize: 12,
+    color: '#888',
+  },
+  addCommentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    marginTop: -15,
+  },
+  input: {
+    flex: 1,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 9,
+    marginRight: 10,
+    fontSize: 15,
+  },
+  addButton: {
+    backgroundColor: '#004a55',
+    padding: 14,
+    borderRadius: 8,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: 'bold',
+  },
 });
 
 export default ViewBookScreen;
