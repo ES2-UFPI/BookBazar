@@ -171,6 +171,8 @@ def Comentar(request):
 
 @api_view(['GET'])
 def Visualizar_Comentarios(request):
+    id_anuncio = request.data.get('id_anuncio', None)
+
     id_anuncio = Comentario.objects.filter(id_anuncio=id_anuncio)
     comentario_serializer = Comentario_Serializer(id_anuncio, context={'request':request})
 
@@ -178,4 +180,49 @@ def Visualizar_Comentarios(request):
         return Response(comentario_serializer, status=status.HTTP_200_OK)
     except:
         return Response({'erro': 'Erro ao Recuperar Comentarios', 'details': comentario_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+@api_view(['GET'])
+def Visualizar_Perfil(request):
+    username = request.data.get('username', None)
+
+    if username is not None:
+
+        credenciais = Credentials.objects.get(username=username)
+
+        if credenciais is None:
+            return Response({'error': 'Credenciais nao Encontradas'}, status=status.HTTP_404_NOT_FOUND)
+
+        user_data = {
+            'email': credenciais.email.email
+        }
+
+        usuario = Usuario.objects.get(email=user_data['email'])
+        #serializer = Usuario_Serializer(usuario, context={'request':request})
+        #return Response(serializer.data, status=status.HTTP_200_OK)
+
+        if request.session.get('isLoggedIn') and username == request.session['username']:
+            response_data = {
+                'username': credenciais.username,
+                'password': credenciais.senha,
+                'cpf_usuario': credenciais.cpf_usuario.cpf_usuario,
+                'email': credenciais.email.email,
+                'nome': usuario.nome,
+                'data_nascimento': usuario.data_nascimento,
+                'telefone': usuario.telefone
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+    
+        if request.session.get('isLoggedIn') and username != request.session['username']:
+            response_data = {
+                'username': credenciais.username,
+                'email': credenciais.email.email,
+                'nome': usuario.nome,
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+    
+        return Response({'erro': 'Erro ao Recuperar Perfil'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response({'erro': 'Username nao Provido'}, status=status.HTTP_400_BAD_REQUEST)
     
