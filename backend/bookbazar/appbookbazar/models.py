@@ -217,7 +217,6 @@ class Usuario(models.Model):
     data_nascimento = models.DateField(db_column='Data_nascimento')  # Field name made lowercase.
     telefone = models.CharField(db_column='Telefone', max_length=13)  # Field name made lowercase.
     email = models.CharField(db_column='Email', unique=True, max_length=255)  # Field name made lowercase.
-    cep = models.CharField(db_column='CEP', max_length=8)  # Field name made lowercase.
 
     class Meta:
         managed = False

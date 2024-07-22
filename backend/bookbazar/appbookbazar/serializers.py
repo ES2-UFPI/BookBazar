@@ -74,4 +74,9 @@ class Credentials_Serializer(serializers.HyperlinkedModelSerializer):
     email = serializers.SlugRelatedField(slug_field='email', queryset=Usuario.objects.all())
     class Meta:
         model = Credentials
-        fields = ['username', 'senha', 'cpf_usuario', 'email']        
+        fields = ['username', 'senha', 'cpf_usuario', 'email']     
+
+class Perfil_Serializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model: Usuario
+        fields = ['Nome', 'email']           
