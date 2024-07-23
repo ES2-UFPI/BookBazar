@@ -1,18 +1,30 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
-// import axios from 'axios';
+import axios from 'axios';
 
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
+  const [usuario, setUsuario] = useState('');
   const [senha, setSenha] = useState('');
 
-  const entrarUsuario  = () => {
-    if (email === '' || senha === '') {
+  const entrarUsuario = () => {
+    if (usuario === '' || senha === '') {
       Alert.alert('Erro', 'Por favor, preencha todos os campos.');
     } else {
-      // Lógica de autenticação
-      Alert.alert('Sucesso', 'Login realizado com sucesso!');
-      navigation.navigate('Home');
+      axios.post('http://127.0.0.1:8000/api/login/', {
+        username: usuario, 
+        password: senha
+      })
+      .then(response => {
+        Alert.alert('Sucesso', 'Login realizado com sucesso!');
+        navigation.navigate('Home');
+      })
+      .catch(error => {
+        if (error.response) {
+          Alert.alert('Erro', error.response.data.error);
+        } else {
+          Alert.alert('Erro', 'Erro ao conectar com o servidor.');
+        }
+      });
     }
   };
 
@@ -26,12 +38,12 @@ const LoginScreen = ({ navigation }) => {
         source={require('../assets/login1.png')}
         style={estilo.logo}
       />
-      <Text style={estilo.nomeRef}>Email: </Text>
+      <Text style={estilo.nomeRef}>Usuário: </Text>
       <TextInput
         style={estilo.entrada}
         placeholder="Usuário"
-        onChangeText={setEmail}
-        value={email}
+        onChangeText={setUsuario}
+        value={usuario}
       />
       <Text style={estilo.nomeRef}>Senha: </Text>
       <TextInput

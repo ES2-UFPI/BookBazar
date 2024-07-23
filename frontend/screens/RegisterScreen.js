@@ -5,6 +5,7 @@ import axios from 'axios';
 const RegisterScreen = ({ navigation }) => {
   const [cpf, setCPF] = useState('');
   const [nome, setNome] = useState('');
+  const [nomeUsuario, setNomeUsuario] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
   const [telefone, setTelefone] = useState('');
   const [email, setEmail] = useState('');
@@ -19,6 +20,10 @@ const RegisterScreen = ({ navigation }) => {
     }
     if (!nome) {
       Alert.alert('Erro', 'Nome é obrigatório.');
+      return false;
+    }
+    if (!nomeUsuario) { 
+      Alert.alert('Erro', 'Nome de usuário é obrigatório.');
       return false;
     }
     if (!dataNascimento) {
@@ -59,12 +64,13 @@ const RegisterScreen = ({ navigation }) => {
     const usuario = {
       cpf_usuario: cpf,
       nome: nome,
+      nome_usuario: nomeUsuario,
       data_nascimento: dataNascimento,
       telefone: telefone,
       email: email,
       senha: senha,
     };
-    axios.post('http://127.0.0.1:8000/cadastrarusuario/', usuario)
+    axios.post('http://127.0.0.1:8000/api/registrar/', usuario)
       .then(response => {
         console.log('Sucesso:', response.data);
         Alert.alert('Cadastro de usuário realizado com sucesso!');
@@ -87,6 +93,9 @@ const RegisterScreen = ({ navigation }) => {
 
         <Text style={estilo.nomeRef}>Nome: </Text>
         <TextInput style={estilo.entrada} onChangeText={setNome} value={nome} />
+
+        <Text style={estilo.nomeRef}>Nome de Usuário: </Text> {/* Novo campo na interface */}
+        <TextInput style={estilo.entrada} onChangeText={setNomeUsuario} value={nomeUsuario} />
 
         <Text style={estilo.nomeRef}>Data de Nascimento: </Text>
         <TextInput style={estilo.entrada} onChangeText={setDataNascimento} value={dataNascimento} />
