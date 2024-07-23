@@ -18,6 +18,7 @@ urlpatterns = [
     path('api/comentar/', Comentar),
     path('api/recuperarComentarios/', Visualizar_Comentarios),
     path('api/recuperarPerfil/', Visualizar_Perfil),
+    path('api/alterarCadastro/', Alterar_Cadastro),
     path('<str:sender_username>/<str:receiver_username>/', chatPage, name='chat'),
     path('', include(router.urls)),
     path('api-auth', include('rest_framework.urls')),

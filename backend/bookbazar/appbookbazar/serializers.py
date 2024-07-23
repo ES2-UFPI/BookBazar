@@ -79,4 +79,14 @@ class Credentials_Serializer(serializers.HyperlinkedModelSerializer):
 class Perfil_Serializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model: Usuario
-        fields = ['Nome', 'email']           
+        fields = ['nome', 'email']      
+
+class Credentials_Update_Serializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Credentials
+        fields = ['username', 'senha', 'email']
+
+class Usuario_Update_Serializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Usuario
+        fields = ['nome', 'telefone', 'email']                    
