@@ -76,43 +76,55 @@ def chatPage(request):
 
 @api_view(['POST'])
 def Registrar_Usuario(request):
+    # Extrair dados do corpo da requisição
+    username = request.data.get('nome_usuario')
+    email = request.data.get('email')
+    senha = request.data.get('senha')
+    cpf_usuario = request.data.get('cpf_usuario')
+    nome = request.data.get('nome')
+    data_nascimento = request.data.get('data_nascimento')
+    telefone = request.data.get('telefone')
 
-    username = request.data.get('nome_usuario', None)
-    email = request.data.get('email', None)
-
+    # Verificar se o nome de usuário já está cadastrado
     if Credentials.objects.filter(username=username).exists():
-        messages.error(request, 'Nome de Usuario Cadastrado')
-        return Response({'error':'Nome de Usuario Cadastrado'}, status=status.HTTP_400_BAD_REQUEST)
-
+        return Response({'error': 'Nome de Usuário Já Cadastrado'}, status=status.HTTP_400_BAD_REQUEST)
+    # Verificar se o e-mail já está cadastrado
     if Credentials.objects.filter(email=email).exists():
-        messages.error(request, 'Email Cadastrado')
-        return Response({'error':'Email Cadastrado'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    credentials_data = {
-        'username':request.data.get('nome_usuario', None),
-        'senha':request.data.get('senha', None),
-        'cpf_usuario':request.data.get('cpf_usuario', None),
-        'email':request.data.get('email', None)
-    }
+        return Response({'error': 'E-mail Já Cadastrado'}, status=status.HTTP_400_BAD_REQUEST)
 
+    # Dados para o modelo Usuario
     user_data = {
-        'cpf_usuario':request.data.get('cpf_usuario', None),
-        'nome':request.data.get('nome', None),
-        'data_nascimento':request.data.get('data_nascimento', None),
-        'telefone':request.data.get('telefone', None),
-        'email':request.data.get('email', None),
+        'cpf_usuario': cpf_usuario,
+        'nome': nome,
+        'data_nascimento': data_nascimento,
+        'telefone': telefone,
+        'email': email,
     }
-
+    
+    # Dados para o modelo Credentials
+    credentials_data = {
+        'username': username,
+        'senha': senha,
+        'cpf_usuario': cpf_usuario,
+        'email': email,
+    }
+    print(credentials_data)
+    # Validar e salvar o usuário
     serializer_usuario = Usuario_Serializer(data=user_data)
-
+    
+    #print(serializer_usuario)
     if serializer_usuario.is_valid():
+        
         user = serializer_usuario.save()
         
+        # Associar o CPF e o e-mail do usuário à credencial
         credentials_data['cpf_usuario'] = user.cpf_usuario
         credentials_data['email'] = user.email
-        serializer_credentials = Credentials_Serializer(data=credentials_data)
         
+        # Validar e salvar as credenciais
+        serializer_credentials = Credentials_Serializer(data=credentials_data)
         if serializer_credentials.is_valid():
+            
             serializer_credentials.save()
             response_data = {
                 'credentials': serializer_credentials.data,
@@ -120,9 +132,9 @@ def Registrar_Usuario(request):
             }
             return Response(response_data, status=status.HTTP_201_CREATED)
         else:
-            return Response({'error':'Erro no Cadastro - Credentials', 'details': serializer_credentials.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Erro ao Cadastrar Credenciais', 'details': serializer_credentials.errors}, status=status.HTTP_400_BAD_REQUEST)
     else:
-        return Response({'error':'Erro no Cadastro - Usuario', 'details': serializer_usuario.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Erro ao Cadastrar Usuário', 'details': serializer_usuario.errors}, status=status.HTTP_400_BAD_REQUEST)
  
 @api_view(['POST'])
 def Logar_Usuario(request):
@@ -185,7 +197,7 @@ def Visualizar_Comentarios(request):
 @api_view(['GET'])
 def Visualizar_Perfil(request):
     username = request.data.get('username', None)
-
+    
     if username is not None:
 
         credenciais = Credentials.objects.get(username=username)
@@ -225,4 +237,50 @@ def Visualizar_Perfil(request):
         return Response({'erro': 'Erro ao Recuperar Perfil'}, status=status.HTTP_400_BAD_REQUEST)
     
     return Response({'erro': 'Username nao Provido'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
+@api_view(['POST'])
+def Alterar_Cadastro(request):
+    if request.session.get('isLoggedIn'):
+        new_username = request.data.get('username', None)
+        new_password = request.data.get('password', None)
+        new_email = request.data.get('email', None)
+
+        new_name = request.data.get('nome', None)
+        new_phone = request.data.get('telefone', None)
+
+        credentials_object = Credentials.objects.get(username=request.session['username'])
+
+        email = credentials_object.email.email
+
+        usuario_object = Usuario.objects.get(email=email)
+
+        credential_update_data = {
+            'username': new_username,
+            'senha': new_password,
+            'email': new_email
+        }
+
+        usuario_update_data = {
+            'nome': new_name,
+            'telefone': new_phone,
+            'email': new_email
+        }
+
+        credential_serializer = Credentials_Update_Serializer(credentials_object, data=credential_update_data, partial=True)
+        usuario_serializer = Usuario_Update_Serializer(usuario_object, data=usuario_update_data, partial=True)
+
+        if usuario_serializer.is_valid():
+            if credential_serializer.is_valid():
+                usuario_serializer.save()
+                credential_serializer.save()
+                request.session['username'] = new_username
+
+                response_data = {
+                    'credential': credential_serializer.data,
+                    'usuario': usuario_serializer.data
+                }
+                return Response(response_data, status=status.HTTP_202_ACCEPTED)
+            return Response({'error': 'Credential Serializer Error', 'details': credential_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Usuario Serializer Error', 'details': usuario_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({'error':'Erro na Alteracao de Cadastro'}, status=status.HTTP_400_BAD_REQUEST)
