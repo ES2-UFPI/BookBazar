@@ -8,7 +8,7 @@ from appbookbazar.models import *
 from django.shortcuts import render
 from django.contrib import messages
 from django.contrib.sessions.models import Session
-
+from django.shortcuts import get_object_or_404
 class Usuario_ViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
 
@@ -154,7 +154,7 @@ def Logar_Usuario(request):
     
     return Response({'error': 'Senha Incorreta'}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
+@api_view(['GET'])
 def Logout_Usuario(request):
     request.session.flush()
     return Response({'message': 'Logout Bem Sucedido'}, status=status.HTTP_200_OK)
@@ -248,7 +248,19 @@ def Alterar_Cadastro(request):
         new_name = request.data.get('nome', None)
         new_phone = request.data.get('telefone', None)
 
+        #username_cadastrado = Credentials.objects.filter(username=new_username)
+
+        #if username_cadastrado is not None:
+        #    return Response({'error': 'Username ja Cadastrado'}, status=status.HTTP_400_BAD_REQUEST)
+
+        #email_cadastrado = Usuario.objects.filter(email=new_email)
+
+        #if email_cadastrado is not None:
+        #    return Response({'error': 'Email ja Cadastrado'}, status=status.HTTP_400_BAD_REQUEST)
+
         credentials_object = Credentials.objects.get(username=request.session['username'])
+
+        old_username = request.session.get('username')
 
         email = credentials_object.email.email
 
@@ -266,14 +278,22 @@ def Alterar_Cadastro(request):
             'email': new_email
         }
 
-        credential_serializer = Credentials_Update_Serializer(credentials_object, data=credential_update_data, partial=True)
-        usuario_serializer = Usuario_Update_Serializer(usuario_object, data=usuario_update_data, partial=True)
+        usuario_serializer = Usuario_Update_Serializer(usuario_object, data=usuario_update_data)
+
+        credentials_object.email.email = new_email
+        credentials_object.save()
 
         if usuario_serializer.is_valid():
+            usuario = usuario_serializer.save()
+            credential_update_data['email'] = usuario.email
+            
+            credential_serializer = Credentials_Update_Serializer(credentials_object, data=credential_update_data, partial=True)
             if credential_serializer.is_valid():
-                usuario_serializer.save()
                 credential_serializer.save()
                 request.session['username'] = new_username
+
+                old_credentials = Credentials.objects.filter(username=old_username)
+                old_credentials.delete()
 
                 response_data = {
                     'credential': credential_serializer.data,
