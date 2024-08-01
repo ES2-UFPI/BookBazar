@@ -36,6 +36,10 @@ const BookBazar = () => {
           name="CreateAd"
           component={CreateAdScreen}
         />
+        <Stack.Screen
+          name="ViewBook"
+          component={ViewBookScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
