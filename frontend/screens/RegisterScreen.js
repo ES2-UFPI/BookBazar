@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import axios from 'axios';
 
 const RegisterScreen = ({ navigation }) => {
@@ -70,7 +70,7 @@ const RegisterScreen = ({ navigation }) => {
       email: email,
       senha: senha,
     };
-    axios.post('http://127.0.0.1:8000/api/registrar/', usuario)
+    axios.post('http://localhost:8000/api/registrar/', usuario)
       .then(response => {
         console.log('Sucesso:', response.data);
         Alert.alert('Cadastro de usuário realizado com sucesso!');
@@ -86,36 +86,39 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   return (
+    
     <View style={estilo.container}>
-      <View style={estilo.pagCadastro}>
-        <Text style={estilo.nomeRef}>CPF: </Text>
-        <TextInput style={estilo.entrada} keyboardType="numeric" onChangeText={setCPF} value={cpf} />
+      <ScrollView keyboardShowldPersistTaps="handled">
+        <View style={estilo.pagCadastro}>
+          <Text style={estilo.nomeRef}>CPF: </Text>
+          <TextInput style={estilo.entrada} keyboardType="numeric" onChangeText={setCPF} value={cpf} />
 
-        <Text style={estilo.nomeRef}>Nome: </Text>
-        <TextInput style={estilo.entrada} onChangeText={setNome} value={nome} />
+          <Text style={estilo.nomeRef}>Nome: </Text>
+          <TextInput style={estilo.entrada} onChangeText={setNome} value={nome} />
 
-        <Text style={estilo.nomeRef}>Nome de Usuário: </Text> {/* Novo campo na interface */}
-        <TextInput style={estilo.entrada} onChangeText={setNomeUsuario} value={nomeUsuario} />
+          <Text style={estilo.nomeRef}>Nome de Usuário: </Text>
+          <TextInput style={estilo.entrada} onChangeText={setNomeUsuario} value={nomeUsuario} />
 
-        <Text style={estilo.nomeRef}>Data de Nascimento: </Text>
-        <TextInput style={estilo.entrada} onChangeText={setDataNascimento} value={dataNascimento} />
+          <Text style={estilo.nomeRef}>Data de Nascimento: </Text>
+          <TextInput style={estilo.entrada} onChangeText={setDataNascimento} value={dataNascimento} />
 
-        <Text style={estilo.nomeRef}>Telefone: </Text>
-        <TextInput style={estilo.entrada} keyboardType="phone-pad" onChangeText={setTelefone} value={telefone} />
+          <Text style={estilo.nomeRef}>Telefone: </Text>
+          <TextInput style={estilo.entrada} keyboardType="phone-pad" onChangeText={setTelefone} value={telefone} />
 
-        <Text style={estilo.nomeRef}>Email: </Text>
-        <TextInput style={estilo.entrada} keyboardType="email-address" onChangeText={setEmail} value={email} />
-        
-        <Text style={estilo.nomeRef}>Senha: </Text>
-        <TextInput style={estilo.entrada} secureTextEntry onChangeText={setSenha} value={senha} />
+          <Text style={estilo.nomeRef}>Email: </Text>
+          <TextInput style={estilo.entrada} keyboardType="email-address" onChangeText={setEmail} value={email} />
+          
+          <Text style={estilo.nomeRef}>Senha: </Text>
+          <TextInput style={estilo.entrada} secureTextEntry onChangeText={setSenha} value={senha} />
 
-        <Text style={estilo.nomeRef}>Confirmar Senha: </Text>
-        <TextInput style={estilo.entrada} secureTextEntry onChangeText={setConfirmarSenha} value={confirmarSenha} />
+          <Text style={estilo.nomeRef}>Confirmar Senha: </Text>
+          <TextInput style={estilo.entrada} secureTextEntry onChangeText={setConfirmarSenha} value={confirmarSenha} />
 
-        <TouchableOpacity style={estilo.btnCadastrarUsuario} disabled={loading} onPress={cadastrarUsuario}>
-            <Text style={{color:'white', fontSize:20, fontWeight: 'bold'}}>Cadastrar</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity style={estilo.btnCadastrarUsuario} disabled={loading} onPress={cadastrarUsuario}>
+              <Text style={{color:'white', fontSize:20, fontWeight: 'bold'}}>Cadastrar</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 };

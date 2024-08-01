@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, FlatList, ScrollView, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 const ViewBookScreen = ({ route, navigation }) => {
@@ -9,11 +10,22 @@ const ViewBookScreen = ({ route, navigation }) => {
   const [comments, setComments] = useState([]);
 
   useEffect(() => {
+
     const fetchBookDetails = async () => {
       try {
-        const response = await axios.get(`.../${bookId}/`);
+        const response = await axios.get('http://localhost:8000/api/visualizar/', { params: { id_anuncio: bookId } });
         setBook(response.data);
-        setComments(response.data.comments || []);
+        //setComments(response.data.comments || []);
+        fetchComments();
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const fetchComments = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/api/recuperarComentarios/', { params: { id_anuncio: bookId } });
+        setComments(response.data); // Atualiza o estado com os comentários recuperados
       } catch (error) {
         console.error(error);
       }
@@ -23,6 +35,7 @@ const ViewBookScreen = ({ route, navigation }) => {
   }, [bookId]);
 
   const handleAddComment = async () => {
+    const username = await AsyncStorage.getItem('username');
     if (comment.trim() === '') {
       Alert.alert('Campo de Comentário Vazio', 'Por favor, digite um comentário ou pergunta.');
       return;
@@ -30,17 +43,26 @@ const ViewBookScreen = ({ route, navigation }) => {
 
     try {
       const newComment = {
-        book: bookId,
-        author: 'User', // Substitua pelo nome do usuário autenticado
-        text: comment,
+        id_anuncio: bookId,
+        autor: username, // Substitua pelo nome do usuário autenticado
+        texto: comment,
       };
 
-      const response = await axios.post('...', newComment);
-      setComments([...comments, response.data]);
+      const response = await axios.post('http://localhost:8000/api/comentar/', newComment);
+      //setComments([...comments, response.data]);
+      setComments(prevComments => [...prevComments, response.data]);
       setComment('');
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const goToHomeScreen = () => {
+    navigation.navigate('Home');
+  };
+
+  const goToCreateAdScreen = () => {
+    navigation.navigate('CreateAd');
   };
 
   if (!book) {
@@ -72,7 +94,7 @@ const ViewBookScreen = ({ route, navigation }) => {
         </View>
         <View style={styles.row}>
           <Text style={styles.title}>Ano de Impressão: </Text>
-          <Text style={styles.dados}>{book.anoImpressao}</Text>
+          <Text style={styles.dados}>{book.ano_impressao}</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.title}>Condição: </Text>
@@ -95,10 +117,10 @@ const ViewBookScreen = ({ route, navigation }) => {
           renderItem={({ item }) => (
             <View style={styles.commentItem}>
               <Text style={styles.commentAuthor}>{item.autor}</Text>
-              <Text style={styles.commentText}>{item.comentario}</Text>
+              <Text style={styles.commentText}>{item.texto}</Text>
             </View>
           )}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={item => item.id_anuncio.toString()}
         />
       </View>
 

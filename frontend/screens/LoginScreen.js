@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 const LoginScreen = ({ navigation }) => {
@@ -10,11 +11,12 @@ const LoginScreen = ({ navigation }) => {
     if (usuario === '' || senha === '') {
       Alert.alert('Erro', 'Por favor, preencha todos os campos.');
     } else {
-      axios.post('http://127.0.0.1:8000/api/login/', {
+      axios.post('http://localhost:8000/api/login/', {
         username: usuario, 
         password: senha
       })
-      .then(response => {
+      .then(async response => {
+        await AsyncStorage.setItem('username', usuario);
         Alert.alert('Sucesso', 'Login realizado com sucesso!');
         navigation.navigate('Home');
       })
@@ -38,14 +40,14 @@ const LoginScreen = ({ navigation }) => {
         source={require('../assets/login1.png')}
         style={estilo.logo}
       />
-      <Text style={estilo.nomeRef}>Usuário: </Text>
+      
       <TextInput
         style={estilo.entrada}
         placeholder="Usuário"
         onChangeText={setUsuario}
         value={usuario}
       />
-      <Text style={estilo.nomeRef}>Senha: </Text>
+      
       <TextInput
         style={estilo.entrada}
         placeholder="Senha"

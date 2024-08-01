@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, FlatList} from 'react-native';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
+import { ListItem } from 'react-native-elements';
 import axios from 'axios';
 
 const HomeScreen = ({ navigation, route }) => {
@@ -53,7 +54,7 @@ const HomeScreen = ({ navigation, route }) => {
       params.latitude_usuario = coords.latitude;
       params.longitude_usuario = coords.longitude;
   
-      const response = await axios.get('http://127.0.0.1:8000/api/pesquisar/', { params });
+      const response = await axios.get('http://localhost:8000/api/pesquisar/', { params });
       console.log(response.data);
       setResults(response.data);
     } catch (error) {
@@ -72,22 +73,29 @@ const HomeScreen = ({ navigation, route }) => {
     }
   };
 
-  const renderResultItem = ({ item }) => (
-    <TouchableOpacity onPress={() => navigation.navigate('DetalhesAnuncio', { id: item.id_anuncio })}>
-      <View style={styles.resultItem}>
-        <View style={styles.imagePlaceholder} />
-        <Text style={styles.resultTitle}>{item.titulo}</Text>
-        <Text>R${item.valor}</Text>
-        {item.distancia !== undefined && <Text style={styles.distancia}>{(item.distancia / 1000).toFixed(2)} km</Text>}
-      </View>
-    </TouchableOpacity>
-  );
+  const getBookItem = ({item}) => {
+    return (
+      <TouchableOpacity onPress={() => navigation.navigate('ViewBook', { bookId: item.id_anuncio })}>
+      <ListItem
+        key={item.id_anuncio}
+        bottomDivider
+        >
+        <View style={styles.resultItem}>
+          <View style={styles.imagePlaceholder}/>
+          {item.distancia !== undefined && <Text style={styles.distancia}>{(item.distancia / 1000).toFixed(2)} km</Text>}
+          <Text numberOfLines={1} style={styles.resultTitle}>{item.titulo}</Text>
+          <Text>R${item.valor}</Text>
+        </View>
+      </ListItem>
+      </TouchableOpacity>
+    )
+  };
 
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.header}>
         <Image
-          source={require('../assets/logo.jpg')}
+          source={require('../assets/login1.png')}
           style={{ width: 50, height: 50, resizeMode: 'contain', marginRight: 10 }}
         />
         <View style={styles.searchBar}>
@@ -112,18 +120,17 @@ const HomeScreen = ({ navigation, route }) => {
         ) : (
           <FlatList
             data={results}
-            renderItem={renderResultItem}
+            renderItem={getBookItem}
             keyExtractor={(item) => item.id_anuncio.toString()}
-            numColumns={2} // Show in two columns
-            contentContainerStyle={styles.flatListContent}
+            numColumns={2}
           />
         )}
       </View>
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.footerItem}>
-          <Ionicons name="home" size={24} color="black" />
-          <Text style={styles.footerText}>Início</Text>
+          <Ionicons name="home" size={24} color="#004a55" />
+          <Text style={styles.footerTextSelected}>Início</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.footerItem} onPress={goToCreateAdScreen}>
           <Ionicons name="add-circle-outline" size={24} color="black" />
@@ -148,10 +155,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: 'lightgray',
   },
+
   searchBar: {
     flex: 1,
     flexDirection: 'row',
@@ -161,19 +169,23 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
   },
+
   searchInput: {
     flex: 1,
     height: 40,
     paddingHorizontal: 10,
   },
+
   searchButton: {
     padding: 10,
     borderLeftWidth: 1,
     borderLeftColor: 'gray',
   },
+
   filterButton: {
     padding: 10,
   },
+
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -182,43 +194,64 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
   },
+
   footerItem: {
     alignItems: 'center',
   },
+
   footerText: {
     marginTop: 5,
-    fontSize: 12,
+    fontSize: 15,
+    fontWeight: 'bold',
   },
+
+  footerTextSelected: {
+    marginTop: 5,
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#004a55',
+  },
+
   resultItem: {
-    width: 150, // Fixed width for all ad items
+    width: 163,
     backgroundColor: 'white',
     padding: 10,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ddd',
-    alignItems: 'center', // Center items horizontally
-    margin: 5, // Margin between grid items
+    alignItems: 'center',
+    margin: 5,
   },
+
   resultTitle: {
     fontWeight: 'bold',
     fontSize: 16,
-    marginTop: 10, // Space above title
+    marginTop: 10,
+  },
+
+  imagePlaceholder: {
+    width: '100%',
+    height: 120,
+    backgroundColor: '#f0f0f0',
+    marginBottom: 10,
+    borderRadius: 8,
+  },
+
+  btnComprar: {
+    width: "50%",
+    height: 35,
+    marginTop: 10,
+    backgroundColor: '#004a55',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderRadius: 10,
   },
   distancia: {
     fontSize: 12,         
     color: 'green',     
   },
-  imagePlaceholder: {
-    width: '100%', // Width occupying all available space
-    height: 120, // Fixed height for image placeholder space
-    backgroundColor: '#f0f0f0', // Background color to indicate reserved space
-    marginBottom: 10, // Space below image
-    borderRadius: 8, // Rounded border
-  },
-  flatListContent: {
-    paddingHorizontal: 10,
-    paddingBottom: 10,
-  },
+
 });
 
 export default HomeScreen;
