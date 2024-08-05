@@ -18,7 +18,10 @@ const LoginScreen = ({ navigation }) => {
       .then(async response => {
         await AsyncStorage.setItem('username', usuario);
         Alert.alert('Sucesso', 'Login realizado com sucesso!');
-        navigation.navigate('Home');
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        });
       })
       .catch(error => {
         if (error.response) {
@@ -40,14 +43,12 @@ const LoginScreen = ({ navigation }) => {
         source={require('../assets/login1.png')}
         style={estilo.logo}
       />
-      
       <TextInput
         style={estilo.entrada}
         placeholder="Usuário"
         onChangeText={setUsuario}
         value={usuario}
       />
-      
       <TextInput
         style={estilo.entrada}
         placeholder="Senha"
@@ -78,30 +79,27 @@ const estilo = StyleSheet.create({
     height: 250,
     marginBottom: 1,
   },
-  nomeRef: {
-    marginBottom: 3,
-    fontSize: 20,
-    fontWeight: 'bold',
-    paddingRight: 325,
-  },
   entrada: {
     width: '100%',
+    height: 45,
     padding: 10,
     borderColor: 'gray',
+    backgroundColor: '#fff',
     borderWidth: 1,
     borderRadius: 10,
     marginBottom: 10,
-    backgroundColor: '#fff',
-    fontSize: 15,
+    fontSize: 16,
   },
   btnEntrar: {
     width: "100%",
-    backgroundColor: '#004a55',
-    borderColor: 'black',
-    alignItems: 'center',
+    height: 45,
     padding: 10,
+    borderColor: 'black',
+    backgroundColor: '#004a55',
+    alignItems: 'center',
     borderWidth: 1,
     borderRadius: 10,
+    marginTop: 2,
   },
   btnEntrarTexto: {
     color: 'white',

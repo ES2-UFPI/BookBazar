@@ -9,7 +9,7 @@ const CreateAdScreen = ({ navigation }) => {
   const [autor, setAutor] = useState('');
   const [editora, setEditora] = useState('');
   const [anoImpressao, setAnoImpressao] = useState('');
-  const [condicao, setCondicao] = useState('');
+  const [condicao, setCondicao] = useState('Usado');
   const [cep, setCep] = useState('');
   const [valor, setValor] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -89,6 +89,10 @@ const CreateAdScreen = ({ navigation }) => {
 
   const goToCreateAdScreen = () => {
     navigation.navigate('CreateAd');
+  };
+
+  const goToViewProfileScreen = () => {
+    navigation.navigate('ViewProfile');
   };
 
   return (
@@ -173,20 +177,20 @@ const CreateAdScreen = ({ navigation }) => {
       {!keyboardVisible && (
         <View style={styles.footer}>
           <TouchableOpacity style={styles.footerItem} onPress={goToHomeScreen}>
-            <Ionicons name="home" size={24} color="black" />
+            <Ionicons name="home-outline" size={24} color="black" />
             <Text style={styles.footerText}>Início</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.footerItem} onPress={goToCreateAdScreen}>
-            <Ionicons name="add-circle-outline" size={24} color="#004a55" />
+            <Ionicons name="add-circle" size={24} color="#004a55" />
             <Text style={styles.footerTextSelected}>Anunciar</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.footerItem}>
             <Ionicons name="chatbubble-outline" size={24} color="black" />
             <Text style={styles.footerText}>Chat</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.footerItem}>
-            <Ionicons name="menu-outline" size={24} color="black" />
-            <Text style={styles.footerText}>Menu</Text>
+          <TouchableOpacity style={styles.footerItem} onPress={goToViewProfileScreen}>
+            <Ionicons name="person-outline" size={24} color="black" />
+            <Text style={styles.footerText}>Eu</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -197,18 +201,15 @@ const CreateAdScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: '#F5F5F5',
   },
-
   keyboardAvoidingView: {
     flex: 1,
   },
-
   scrollContainer: {
     padding: 10,
     paddingBottom: 70,
   },
-
   label: {
     marginTop: 10,
     marginBottom: 5,
@@ -216,35 +217,31 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
   },
-
   input: {
     width: "100%",
     height: 40,
     borderColor: 'gray',
+    backgroundColor: '#F9F9F9',
     borderWidth: 1,
     borderRadius: 10,
     paddingLeft: 10,
-    fontSize: 15,
+    fontSize: 16,
   },
-
   descriptionInput: {
     height: 100,
     textAlignVertical: 'top',
     textAlign: 'justify',
   },
-
   btnCreateAd: {
-    width: "50%",
-    marginLeft: 100,
+    width: "100%",
     height: 40,
-    marginTop: 10,
+    marginTop: 12,
     backgroundColor: '#004a55',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderRadius: 10,
   },
-
   footer: {
     position: 'absolute',
     bottom: 0,
@@ -255,37 +252,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'lightgray',
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    elevation: 5,
   },
-
   footerItem: {
     alignItems: 'center',
   },
-
   footerText: {
     marginTop: 5,
     fontSize: 15,
     fontWeight: 'bold',
   },
-
   footerTextSelected: {
     marginTop: 5,
     fontSize: 15,
     fontWeight: 'bold',
     color: '#004a55',
   },
-
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-
   largeColumn: {
     flex: 2,
     marginRight: 3,
   },
-
   smallColumn: {
     flex: 1,
     marginLeft: 3,
