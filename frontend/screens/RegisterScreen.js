@@ -86,24 +86,35 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   return (
-    
     <View style={estilo.container}>
-      <ScrollView keyboardShowldPersistTaps="handled">
+      <ScrollView keyboardShouldPersistTaps="handled">
         <View style={estilo.pagCadastro}>
           <Text style={estilo.nomeRef}>CPF: </Text>
           <TextInput style={estilo.entrada} keyboardType="numeric" onChangeText={setCPF} value={cpf} />
 
-          <Text style={estilo.nomeRef}>Nome: </Text>
-          <TextInput style={estilo.entrada} onChangeText={setNome} value={nome} />
+          <View style={estilo.row}>
+            <View style={estilo.inputContainer}>
+              <Text style={estilo.nomeRef}>Nome: </Text>
+              <TextInput style={estilo.entrada} onChangeText={setNome} value={nome} />
+            </View>
 
-          <Text style={estilo.nomeRef}>Nome de Usuário: </Text>
-          <TextInput style={estilo.entrada} onChangeText={setNomeUsuario} value={nomeUsuario} />
+            <View style={estilo.inputContainer}>
+              <Text style={estilo.nomeRef}>Nome de Usuário: </Text>
+              <TextInput style={estilo.entrada} onChangeText={setNomeUsuario} value={nomeUsuario} />
+            </View>
+          </View>
 
-          <Text style={estilo.nomeRef}>Data de Nascimento: </Text>
-          <TextInput style={estilo.entrada} onChangeText={setDataNascimento} value={dataNascimento} />
+          <View style={estilo.row}>
+            <View style={estilo.inputContainer}>
+              <Text style={estilo.nomeRef}>Data de Nascimento: </Text>
+              <TextInput style={estilo.entrada} onChangeText={setDataNascimento} value={dataNascimento} />
+            </View>
 
-          <Text style={estilo.nomeRef}>Telefone: </Text>
-          <TextInput style={estilo.entrada} keyboardType="phone-pad" onChangeText={setTelefone} value={telefone} />
+            <View style={estilo.inputContainer}>
+              <Text style={estilo.nomeRef}>Telefone: </Text>
+              <TextInput style={estilo.entrada} keyboardType="phone-pad" onChangeText={setTelefone} value={telefone} />
+            </View>
+          </View>
 
           <Text style={estilo.nomeRef}>Email: </Text>
           <TextInput style={estilo.entrada} keyboardType="email-address" onChangeText={setEmail} value={email} />
@@ -115,7 +126,7 @@ const RegisterScreen = ({ navigation }) => {
           <TextInput style={estilo.entrada} secureTextEntry onChangeText={setConfirmarSenha} value={confirmarSenha} />
 
           <TouchableOpacity style={estilo.btnCadastrarUsuario} disabled={loading} onPress={cadastrarUsuario}>
-              <Text style={{color:'white', fontSize:20, fontWeight: 'bold'}}>Cadastrar</Text>
+              <Text style={{color:'white', fontSize:20, fontWeight: 'bold'}}>Finalizar Cadastro</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -126,15 +137,21 @@ const RegisterScreen = ({ navigation }) => {
 const estilo = StyleSheet.create({
  container: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: '#F5F5F5',
     alignItems: 'left',
     justifyContent: 'left',
   },
-
   pagCadastro: {
     padding: 10,
   },
-
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  inputContainer: {
+    flex: 1,
+    marginRight: 5,
+  },
   nomeRef: {
     marginTop: 10,
     marginBottom: 5,
@@ -142,22 +159,20 @@ const estilo = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
   },
-
   entrada: {
     width: "100%",
     height: 40,
     borderColor: 'gray',
+    backgroundColor: '#F9F9F9',
     borderWidth: 1,
     borderRadius: 10,
     paddingLeft: 10,
-    fontSize: 15,
+    fontSize: 16,
   },
-
   btnCadastrarUsuario: {
-    width: "50%",
-    marginLeft: 100,
+    width: "100%",
     height: 40,
-    marginTop: 10,
+    marginTop: 12,
     backgroundColor: '#004a55',
     alignItems: 'center',
     justifyContent: 'center',
