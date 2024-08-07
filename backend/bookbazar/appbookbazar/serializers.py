@@ -67,7 +67,7 @@ class Transacao_Serializer(serializers.HyperlinkedModelSerializer):
 class Mensagem_Serializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Mensagem
-        fields = ['cpf_remetente', 'cpf_destinatario', 'chat_id', 'horario_mensagem', 'conteudo_mensagem']    
+        fields = ['sender_username', 'receiver_username', 'chat_id', 'horario_mensagem', 'conteudo_mensagem']    
 
 class Credentials_Serializer(serializers.HyperlinkedModelSerializer):
     cpf_usuario = serializers.SlugRelatedField(slug_field='cpf_usuario', queryset=Usuario.objects.all())
