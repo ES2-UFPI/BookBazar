@@ -9,6 +9,8 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.contrib.sessions.models import Session
 from django.shortcuts import get_object_or_404
+from datetime import datetime
+
 class Usuario_ViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
 
@@ -304,3 +306,56 @@ def Alterar_Cadastro(request):
         return Response({'error': 'Usuario Serializer Error', 'details': usuario_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response({'error':'Erro na Alteracao de Cadastro'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def Enviar_Mensagem(request):
+    if request.session.get('isLoggedIn'):
+        sender_username = request.session['username']
+        receiver_username = request.data.get('receiver_username', None)
+
+        chat_id_list = sorted([sender_username, receiver_username])
+        chat_id = "_".join(chat_id_list)
+
+        horario_mensagem = datetime.now()
+
+        conteudo_mensagem = request.data.get('mensagem', None)
+
+        mensagem_data = {
+            "sender_username": sender_username,
+            "receiver_username": receiver_username,
+            "chat_id": chat_id,
+            "horario_mensagem": horario_mensagem,
+            "conteudo_mensagem": conteudo_mensagem
+        }
+
+        serializer_mensagem = Mensagem_Serializer(data=mensagem_data)
+
+        if serializer_mensagem.is_valid():
+            serializer_mensagem.save()
+
+            response_data = {
+                'mensagem': serializer_mensagem.data
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+        return Response({'error': 'Mensagem Serializer Error', 'details': serializer_mensagem.errors}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'error': 'Erro de Sistema'}, status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['GET'])
+def Recuperar_Mensagens(request):
+    if request.session.get('isLoggedIn'):
+        myself = request.session.get('username')
+        other = request.data.get('receiver_username', None)
+
+        chat_list = sorted([myself, other])
+        chat_id = "_".join(chat_list)
+
+        mensagens_recuperadas = Mensagem.objects.filter(chat_id=chat_id)
+
+        serializer_mensagem = Mensagem_Serializer(mensagens_recuperadas, many=True, context={'request':request})
+
+        if serializer_mensagem.is_valid():
+            return Response(serializer_mensagem.data, status=status.HTTP_200_OK)
+        return Response({'error': 'Mensagem Serializer Error', 'details': serializer_mensagem.errors}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'error': 'Erro de Sistema'}, status=status.HTTP_401_UNAUTHORIZED)
