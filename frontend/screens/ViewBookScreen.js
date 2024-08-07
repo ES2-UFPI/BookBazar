@@ -9,7 +9,8 @@ const ViewBookScreen = ({ route, navigation }) => {
   const [book, setBook] = useState(null);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
-
+  const [loggedInUser, setLoggedInUser] = useState('');
+  
   useEffect(() => {
     const fetchBookDetails = async () => {
       try {
@@ -17,6 +18,9 @@ const ViewBookScreen = ({ route, navigation }) => {
         setBook(response.data);
         //setComments(response.data.comments || []);
         fetchComments();
+
+        const username = await AsyncStorage.getItem('username');
+        setLoggedInUser(username);
       } catch (error) {
         console.error(error);
       }
@@ -64,6 +68,10 @@ const ViewBookScreen = ({ route, navigation }) => {
       </View>
     );
   }
+
+  const goToChatScreen = () => {
+    navigation.navigate('ChatScreen', { receiverUsername: book.username });
+  };
 
   const goToHomeScreen = () => {
     navigation.navigate('Home');
@@ -121,6 +129,11 @@ const ViewBookScreen = ({ route, navigation }) => {
               <Text style={styles.title}>Descrição: </Text>
               <Text style={styles.dados}>{book.descricao}</Text>
             </View>
+            {loggedInUser !== book.username && (
+              <TouchableOpacity style={styles.chatButton} onPress={goToChatScreen}>
+                <Text style={styles.chatButtonText}>Fale com o vendedor</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           <View style={styles.commentsContainer}>
@@ -312,6 +325,18 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
     color: '#004a55',
+  },
+  chatButton: {
+    backgroundColor: '#004a55',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  chatButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

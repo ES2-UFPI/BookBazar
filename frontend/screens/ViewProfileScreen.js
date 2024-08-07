@@ -15,7 +15,7 @@ const ViewProfileScreen = ({ navigation }) => {
     const fetchProfileDetails = async () => {
       try {
         const username = await AsyncStorage.getItem('username');
-        const response = await axios.get('http://localhost:8000/api/profile/', { params: { username } });
+        const response = await axios.get('http://localhost:8000/api/recuperarPerfil/', { params: { username } });
         setProfile(response.data);
         setUsername(response.data.username);
         setPhone(response.data.phone);
