@@ -149,7 +149,7 @@ const HomeScreen = ({ navigation, route }) => {
             <Ionicons name="add-circle-outline" size={24} color="black" />
             <Text style={styles.footerText}>Anunciar</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.footerItem}>
+          <TouchableOpacity style={styles.footerItem} onPress={() => navigation.navigate('ChatList')}>
             <Ionicons name="chatbubble-outline" size={24} color="black" />
             <Text style={styles.footerText}>Chat</Text>
           </TouchableOpacity>

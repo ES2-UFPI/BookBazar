@@ -9,8 +9,11 @@ import FilterScreen from './screens/FilterScreen';
 import CreateAdScreen from './screens/CreateAdScreen';
 import ViewBookScreen from './screens/ViewBookScreen';
 import ViewProfileScreen from './screens/ViewProfileScreen';
+import ChatScreen from './screens/ChatScreen';
+import ChatListScreen from './screens/ChatListScreen';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const Stack = createStackNavigator();
 
@@ -90,6 +93,19 @@ const BookBazar = () => {
             title: 'Visualizar Perfil'
           }}
         />
+        <Stack.Screen
+          name="ChatScreen"
+          component={ChatScreen}
+          options={{
+            title: 'Chat',
+          }}
+        />
+        <Stack.Screen 
+        name="ChatList" 
+        component={ChatListScreen} 
+        options={{ 
+            title: 'Chats' 
+        }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

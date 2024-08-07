@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform, Keyboard, SafeAreaView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 
@@ -31,7 +32,7 @@ const CreateAdScreen = ({ navigation }) => {
 
   getCoordinatesFromCep = async (cep) => {
     try {
-      const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${cep}&key=CHAVE`);
+      const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${cep}&key=AIzaSyCVXRKOYXbCLJhCuKi_rPN6UQ-Iqez2iIA`);
       if (response.data.results.length > 0) {
         const { lat, lng } = response.data.results[0].geometry.location;
         return { latitude: lat, longitude: lng };
@@ -56,6 +57,7 @@ const CreateAdScreen = ({ navigation }) => {
       return Math.round(num * 100000) / 100000; // 100000 = 10^5, arredonda para 5 casas decimais
     };
     
+    const username = await AsyncStorage.getItem('username');
     const roundedLatitude = roundTo5Decimals(coordinates.latitude);
     const roundedLongitude = roundTo5Decimals(coordinates.longitude);
   
@@ -70,6 +72,7 @@ const CreateAdScreen = ({ navigation }) => {
       descricao: descricao,
       latitude: roundedLatitude,
       longitude: roundedLongitude,
+      username: username,
     };
     try {
       const response = await axios.post('http://localhost:8000/api/anunciar/', livro);
