@@ -10,22 +10,22 @@ from geopy.distance import geodesic
 
 
 class Anuncio(models.Model):
-    id_anuncio = models.AutoField(db_column='ID_Anuncio', primary_key=True)  # Field name made lowercase.
-    titulo = models.CharField(db_column='Titulo', max_length=255)  # Field name made lowercase.
-    autor = models.CharField(db_column='Autor', max_length=255)  # Field name made lowercase.
-    editora = models.CharField(db_column='Editora', max_length=255)  # Field name made lowercase.
-    edicao = models.IntegerField(db_column='Edicao')  # Field name made lowercase.
-    genero = models.CharField(db_column='Genero', max_length=255)  # Field name made lowercase.
-    idioma = models.CharField(db_column='Idioma', max_length=255)  # Field name made lowercase.
-    cpf_vendedor = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='CPF_Vendedor')  # Field name made lowercase.
-    valor = models.DecimalField(db_column='Valor', max_digits=10, decimal_places=0)  # Field name made lowercase.
-    cidade = models.CharField(db_column='Cidade', max_length=255)  # Field name made lowercase.
-    cep_anuncio = models.CharField(db_column='CEP_Anuncio', max_length=8)  # Field name made lowercase.
-    latitude = models.DecimalField(db_column='Latitude', max_digits=7, decimal_places=5)  # Field name made lowercase.
-    longitude = models.DecimalField(db_column='Longitude', max_digits=7, decimal_places=5)  # Field name made lowercase.
-    descricao = models.CharField(db_column='Descricao', max_length=1024)  # Field name made lowercase.
-    ano_impressao = models.IntegerField(db_column='Ano_Impressao')  # Field name made lowercase.
-    condicao = models.CharField(db_column='Condicao', max_length=255)  # Field name made lowercase.
+    id_anuncio = models.AutoField(db_column='ID_Anuncio', primary_key=True)
+    titulo = models.CharField(db_column='Titulo', max_length=255)
+    autor = models.CharField(db_column='Autor', max_length=255)
+    editora = models.CharField(db_column='Editora', max_length=255)
+    edicao = models.IntegerField(db_column='Edicao', blank=True, null=True)
+    genero = models.CharField(db_column='Genero', max_length=255, null=True, blank=True)
+    idioma = models.CharField(db_column='Idioma', max_length=255, null=True, blank=True)
+    username = models.CharField(db_column='Vendedor', max_length=155)
+    valor = models.DecimalField(db_column='Valor', max_digits=10, decimal_places=2)
+    cidade = models.CharField(db_column='Cidade', max_length=255, null=True, blank=True)
+    cep_anuncio = models.CharField(db_column='CEP_Anuncio', max_length=8)
+    latitude = models.DecimalField(db_column='Latitude', max_digits=7, decimal_places=5)
+    longitude = models.DecimalField(db_column='Longitude', max_digits=7, decimal_places=5)
+    descricao = models.CharField(db_column='Descricao', max_length=1024, null=True, blank=True)
+    ano_impressao = models.IntegerField(db_column='Ano_Impressao')
+    condicao = models.CharField(db_column='Condicao', max_length=255)
 
     def calcular_distancia(self, latitude_usuario, longitude_usuario):
         ponto_anuncio = (self.latitude, self.longitude)
@@ -34,7 +34,7 @@ class Anuncio(models.Model):
         return round(distancia, 2)
 
     class Meta:
-        managed = False
+        #managed = False
         db_table = 'anuncio'
 
 
@@ -189,14 +189,14 @@ class DjangoSession(models.Model):
 
 class Mensagem(models.Model):
     id_mensagem = models.AutoField(primary_key=True)
-    sender_username = models.ForeignKey(Credentials, models.DO_NOTHING, db_column='sender_username')
-    receiver_username = models.ForeignKey(Credentials, models.DO_NOTHING, db_column='receiver_username', related_name='mensagem_receiver_username_set')
-    chat_id = models.IntegerField()
-    horario_mensagem = models.DateTimeField()
-    conteudo_mensagem = models.TextField()
+    sender_username = models.CharField(max_length=255)  # Altere para CharField
+    receiver_username = models.CharField(max_length=255)  # Altere para CharField
+    chat_id = models.IntegerField(db_column='chat_id', blank=True, null=True)
+    horario_mensagem = models.DateTimeField(db_column='horario_mensagem')
+    conteudo_mensagem = models.TextField(db_column='conteudo_mensagem')
 
     class Meta:
-        managed = False
+        #managed = False
         db_table = 'mensagem'
 
 

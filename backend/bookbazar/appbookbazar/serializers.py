@@ -7,25 +7,19 @@ class Cadastrar_Anuncio_Serializer(serializers.ModelSerializer):
         model = Anuncio
         fields = [
             'titulo', 'autor', 'editora', 'edicao', 'genero', 'idioma',
-            'cpf_vendedor', 'valor', 'cidade', 'cep_anuncio', 'latitude',
+            'username', 'valor', 'cidade', 'cep_anuncio', 'latitude',
             'longitude', 'descricao', 'ano_impressao', 'condicao'
         ]
 
     def create(self, validated_data):
         return super().create(validated_data)
+    
 class Visualizar_Anuncio_Serializer(serializers.HyperlinkedModelSerializer):
-    distancia_usuario = serializers.SerializerMethodField
+    
     class Meta:
         model = Anuncio
-        fields = ['id_anuncio', 'titulo', 'autor', 'editora', 'edicao', 'genero', 'idioma', 'cpf_vendedor', 'valor', 'cidade', 'descricao', 'ano_impressao', 'condicao', 'distancia_usuario']
+        fields = ['id_anuncio', 'titulo', 'autor', 'editora', 'edicao', 'genero', 'idioma', 'username', 'valor', 'cidade', 'descricao', 'ano_impressao', 'condicao']
 
-    def get_distancia_usuario(self, obj):
-        latitude_usuario = self.context.get('latitude_usuario')
-        longitude_usuario = self.context.get('longitude_usuario')
-        if latitude_usuario and longitude_usuario:
-            return obj.calcular_distancia(latitude_usuario, longitude_usuario)
-        
-        return None    
 
 class Pesquisa_Serializer(serializers.HyperlinkedModelSerializer):
     distancia = serializers.SerializerMethodField()
@@ -50,9 +44,10 @@ class Usuario_Serializer(serializers.HyperlinkedModelSerializer):
         fields = ['cpf_usuario', 'nome', 'data_nascimento', 'telefone', 'email']
 
 class Comentario_Serializer(serializers.HyperlinkedModelSerializer):
+    id_anuncio = serializers.PrimaryKeyRelatedField(queryset=Anuncio.objects.all())
     class Meta:
         model = Comentario
-        fields = ['id_comentario', 'id_anuncio', 'autor', 'texto']
+        fields = ['id_anuncio', 'autor', 'texto']
 
 class Avaliacao_Serializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -64,10 +59,14 @@ class Transacao_Serializer(serializers.HyperlinkedModelSerializer):
         model = Transacao
         fields = []                
     
-class Mensagem_Serializer(serializers.HyperlinkedModelSerializer):
+
+class Mensagem_Serializer(serializers.ModelSerializer):
+    sender_username = serializers.CharField(max_length=255)
+    receiver_username = serializers.CharField(max_length=255)
+
     class Meta:
         model = Mensagem
-        fields = ['sender_username', 'receiver_username', 'chat_id', 'horario_mensagem', 'conteudo_mensagem']    
+        fields = ['id_mensagem', 'sender_username', 'receiver_username', 'horario_mensagem', 'conteudo_mensagem']
 
 class Credentials_Serializer(serializers.HyperlinkedModelSerializer):
     cpf_usuario = serializers.SlugRelatedField(slug_field='cpf_usuario', queryset=Usuario.objects.all())
