@@ -19,7 +19,7 @@ class Usuario_ViewSet(viewsets.ModelViewSet):
     serializer_class = Usuario_Serializer
 
 @api_view(['POST'])
-def Cadastrar_Anuncio(request):
+def cadastrar_anuncio(request):
     serializer = Cadastrar_Anuncio_Serializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -27,7 +27,7 @@ def Cadastrar_Anuncio(request):
     return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
-def Pesquisar_Anuncios(request):
+def pesquisar_anuncios(request):
     search_query = request.query_params.get('search', '')
     filter_type = request.query_params.get('filter', '')
 
@@ -101,7 +101,7 @@ def salvar_usuario(user_data, credentials_data):
     return None, status.HTTP_400_BAD_REQUEST
 
 @api_view(['POST'])
-def Registrar_Usuario(request):
+def registrar_usuario(request):
     username = request.data.get('nome_usuario')
     email = request.data.get('email')
     senha = request.data.get('senha')
@@ -138,17 +138,17 @@ def Registrar_Usuario(request):
     return Response({'error': 'Erro ao Cadastrar Usuário ou Credenciais'}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-def Logar_Usuario(request):
+def logar_usuario(request):
     proxy = LoginProxy(request)
     return proxy._authenticate_user()
 
 @api_view(['GET'])
-def Logout_Usuario(request):
+def logout_usuario(request):
     request.session.flush()
     return Response({'message': 'Logout Bem Sucedido'}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-def Check_Login(request):
+def check_login(request):
     if request.session.get('isLoggedIn'):
         username = request.session.get('username')
         data = {"username": username}
@@ -157,19 +157,24 @@ def Check_Login(request):
     return Response({'error': 'Usuario nao Logado'}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-def Comentar(request):
+def comentar(request):
     print("Dados recebidos:", request.data)
 
     serializer = Comentario_Serializer(data=request.data)
         
+    validar_e_salvar(serializer, status.HTTP_201_CREATED, 'Usuario nao Logado')
+
+    # Extracao de Metodo
+    '''    
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
         
     return Response({'error': 'Usuario nao Logado'}, status=status.HTTP_400_BAD_REQUEST)  
+    '''
 
 @api_view(['GET'])
-def Visualizar_Comentarios(request):
+def visualizar_comentarios(request):
     id_anuncio = request.GET.get('id_anuncio', None)
     if id_anuncio is None:
         return Response({'erro': 'ID do anúncio não fornecido'}, status=status.HTTP_400_BAD_REQUEST)
@@ -184,7 +189,7 @@ def Visualizar_Comentarios(request):
     
     
 @api_view(['GET'])
-def Visualizar_Perfil(request):
+def visualizar_perfil(request):
     username = request.query_params.get('username', None)  # Usar query_params para GET
 
     if username is not None:
@@ -202,7 +207,7 @@ def Visualizar_Perfil(request):
     return Response({'error': 'Username não fornecido'}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-def Alterar_Cadastro(request):
+def alterar_cadastro(request):
     if request.session.get('isLoggedIn'):
         new_username = request.data.get('username', None)
         new_password = request.data.get('password', None)
@@ -260,7 +265,7 @@ def Alterar_Cadastro(request):
 
 
 @api_view(['POST'])
-def Enviar_Mensagem(request):
+def enviar_mensagem(request):
     
     sender_username = request.data.get('sender_username')
     receiver_username = request.data.get('receiver_username')
@@ -279,16 +284,20 @@ def Enviar_Mensagem(request):
         print(mensagem_data)
         serializer_mensagem = Mensagem_Serializer(data=mensagem_data)
 
+        validar_e_salvar(serializer_mensagem, status.HTTP_200_OK, 'Mensagem Serializer Error')
+
+        # Extracao de Metodo
+        '''
         if serializer_mensagem.is_valid():
             serializer_mensagem.save()
             response_data = {'mensagem': serializer_mensagem.data}
             return Response(response_data, status=status.HTTP_200_OK)
         return Response({'error': 'Mensagem Serializer Error', 'details': serializer_mensagem.errors}, status=status.HTTP_400_BAD_REQUEST)
-
+        '''
     return Response({'error': 'Dados insuficientes'}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-def Recuperar_Mensagens(request):
+def recuperar_mensagens(request):
     sender_username = request.query_params.get('sender_username')
     receiver_username = request.query_params.get('receiver_username')
 
@@ -305,7 +314,7 @@ def Recuperar_Mensagens(request):
     return Response({'error': 'Dados insuficientes'}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-def Recuperar_Chats(request):
+def recuperar_chats(request):
     username = request.query_params.get('username')
     if username:
         # Obter todos os chats onde o usuário é o remetente
@@ -334,3 +343,8 @@ def Recuperar_Chats(request):
         return Response(chat_list, status=status.HTTP_200_OK)
 
     return Response({'error': 'Dados insuficientes'}, status=status.HTTP_400_BAD_REQUEST)
+
+def validar_e_salvar(serializer, sucesso_status, mensagem_erro):
+    if serializer.is_valid():
+        return Response(serializer.data, status=sucesso_status)
+    return Response({'error': mensagem_erro, 'details': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
