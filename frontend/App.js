@@ -3,7 +3,7 @@ import { StatusBar, TouchableOpacity, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './screens/LoginScreen';
-import RegisterScreen from './screens/RegisterScreen';
+import RegisterScreen from './screens/refactoring/RegisterScreen';
 import HomeScreen from './screens/HomeScreen';
 import FilterScreen from './screens/FilterScreen';
 import CreateAdScreen from './screens/CreateAdScreen';
@@ -13,7 +13,6 @@ import ChatScreen from './screens/ChatScreen';
 import ChatListScreen from './screens/ChatListScreen';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 const Stack = createStackNavigator();
 
@@ -101,11 +100,12 @@ const BookBazar = () => {
           }}
         />
         <Stack.Screen 
-        name="ChatList" 
-        component={ChatListScreen} 
-        options={{ 
-            title: 'Chats' 
-        }} />
+          name="ChatList" 
+          component={ChatListScreen} 
+          options={{ 
+              title: 'Chats' 
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
