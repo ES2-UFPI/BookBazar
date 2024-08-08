@@ -11,6 +11,7 @@ from django.contrib.sessions.models import Session
 from django.shortcuts import get_object_or_404
 from datetime import datetime
 from django.db.models import Q
+from .proxies.login_proxy import LoginProxy
 
 class Usuario_ViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
@@ -138,24 +139,11 @@ def Registrar_Usuario(request):
             return Response({'error': 'Erro ao Cadastrar Credenciais', 'details': serializer_credentials.errors}, status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response({'error': 'Erro ao Cadastrar Usuário', 'details': serializer_usuario.errors}, status=status.HTTP_400_BAD_REQUEST)
- 
+
 @api_view(['POST'])
 def Logar_Usuario(request):
-    username = request.data.get('username', None)
-    password = request.data.get('password', None)
-
-    credentials = Credentials.objects.all()
-    credentials = credentials.filter(username=username).first()
-
-    if credentials is None:
-        return Response({'error':'Nome de Usuario nao Cadastrado'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    if password == credentials.senha:
-        request.session['isLoggedIn'] = True
-        request.session['username'] = username
-        return Response({'message': 'Login Bem Sucedido'}, status=status.HTTP_200_OK)
-    
-    return Response({'error': 'Senha Incorreta'}, status=status.HTTP_400_BAD_REQUEST)
+    proxy = LoginProxy(request)
+    return proxy._authenticate_user()
 
 @api_view(['GET'])
 def Logout_Usuario(request):
