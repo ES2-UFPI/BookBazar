@@ -55,7 +55,7 @@ def Pesquisar_Anuncios(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-def Visualizar_Anuncio(request):
+def visualizar_anuncio_por_id(request):
     id_anuncio = request.GET.get('id_anuncio', None)
 
     if id_anuncio:
@@ -78,9 +78,30 @@ def chatPage(request):
     }
     return render(request, "appbookbazar/novoChat.html", context)
 
+def validar_usuario(username, email):
+    if Credentials.objects.filter(username=username).exists():
+        return {'error': 'Nome de Usuário Já Cadastrado'}, status.HTTP_400_BAD_REQUEST
+    if Credentials.objects.filter(email=email).exists():
+        return {'error': 'E-mail Já Cadastrado'}, status.HTTP_400_BAD_REQUEST
+    return None, None
+
+def salvar_usuario(user_data, credentials_data):
+    serializer_usuario = Usuario_Serializer(data=user_data)
+    if serializer_usuario.is_valid():
+        user = serializer_usuario.save()
+        credentials_data['cpf_usuario'] = user.cpf_usuario
+        credentials_data['email'] = user.email
+        serializer_credentials = Credentials_Serializer(data=credentials_data)
+        if serializer_credentials.is_valid():
+            serializer_credentials.save()
+            return {
+                'credentials': serializer_credentials.data,
+                'usuario': serializer_usuario.data
+            }, status.HTTP_201_CREATED
+    return None, status.HTTP_400_BAD_REQUEST
+
 @api_view(['POST'])
 def Registrar_Usuario(request):
-    # Extrair dados do corpo da requisição
     username = request.data.get('nome_usuario')
     email = request.data.get('email')
     senha = request.data.get('senha')
@@ -89,14 +110,12 @@ def Registrar_Usuario(request):
     data_nascimento = request.data.get('data_nascimento')
     telefone = request.data.get('telefone')
 
-    # Verificar se o nome de usuário já está cadastrado
-    if Credentials.objects.filter(username=username).exists():
-        return Response({'error': 'Nome de Usuário Já Cadastrado'}, status=status.HTTP_400_BAD_REQUEST)
-    # Verificar se o e-mail já está cadastrado
-    if Credentials.objects.filter(email=email).exists():
-        return Response({'error': 'E-mail Já Cadastrado'}, status=status.HTTP_400_BAD_REQUEST)
+    # Validação
+    error_response, error_status = validar_usuario(username, email)
+    if error_response:
+        return Response(error_response, status=error_status)
 
-    # Dados para o modelo Usuario
+    # Dados para o modelo Usuario e Credentials
     user_data = {
         'cpf_usuario': cpf_usuario,
         'nome': nome,
@@ -105,40 +124,18 @@ def Registrar_Usuario(request):
         'email': email,
     }
     
-    # Dados para o modelo Credentials
     credentials_data = {
         'username': username,
         'senha': senha,
         'cpf_usuario': cpf_usuario,
         'email': email,
     }
-    print(credentials_data)
-    # Validar e salvar o usuário
-    serializer_usuario = Usuario_Serializer(data=user_data)
-    
-    #print(serializer_usuario)
-    if serializer_usuario.is_valid():
-        
-        user = serializer_usuario.save()
-        
-        # Associar o CPF e o e-mail do usuário à credencial
-        credentials_data['cpf_usuario'] = user.cpf_usuario
-        credentials_data['email'] = user.email
-        
-        # Validar e salvar as credenciais
-        serializer_credentials = Credentials_Serializer(data=credentials_data)
-        if serializer_credentials.is_valid():
-            
-            serializer_credentials.save()
-            response_data = {
-                'credentials': serializer_credentials.data,
-                'usuario': serializer_usuario.data
-            }
-            return Response(response_data, status=status.HTTP_201_CREATED)
-        else:
-            return Response({'error': 'Erro ao Cadastrar Credenciais', 'details': serializer_credentials.errors}, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return Response({'error': 'Erro ao Cadastrar Usuário', 'details': serializer_usuario.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Salvar usuário e credenciais
+    response_data, status_code = salvar_usuario(user_data, credentials_data)
+    if response_data:
+        return Response(response_data, status=status_code)
+    return Response({'error': 'Erro ao Cadastrar Usuário ou Credenciais'}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def Logar_Usuario(request):
