@@ -9,7 +9,7 @@ router.register(r'cadastrarusuario', Usuario_ViewSet)
 
 urlpatterns = [
     path('api/anunciar/', Cadastrar_Anuncio),
-    path('api/visualizar/', Visualizar_Anuncio),
+    path('api/visualizar/', visualizar_anuncio_por_id),
     path('api/pesquisar/', Pesquisar_Anuncios),
     path('api/registrar/', Registrar_Usuario),
     path('api/login/', Logar_Usuario),
