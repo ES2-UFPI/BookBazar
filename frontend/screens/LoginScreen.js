@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 const LoginScreen = ({ navigation }) => {
@@ -10,13 +11,17 @@ const LoginScreen = ({ navigation }) => {
     if (usuario === '' || senha === '') {
       Alert.alert('Erro', 'Por favor, preencha todos os campos.');
     } else {
-      axios.post('http://127.0.0.1:8000/api/login/', {
+      axios.post('http://localhost:8000/api/login/', {
         username: usuario, 
         password: senha
       })
-      .then(response => {
+      .then(async response => {
+        await AsyncStorage.setItem('username', usuario);
         Alert.alert('Sucesso', 'Login realizado com sucesso!');
-        navigation.navigate('Home');
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        });
       })
       .catch(error => {
         if (error.response) {
@@ -38,14 +43,12 @@ const LoginScreen = ({ navigation }) => {
         source={require('../assets/login1.png')}
         style={estilo.logo}
       />
-      <Text style={estilo.nomeRef}>Usuário: </Text>
       <TextInput
         style={estilo.entrada}
         placeholder="Usuário"
         onChangeText={setUsuario}
         value={usuario}
       />
-      <Text style={estilo.nomeRef}>Senha: </Text>
       <TextInput
         style={estilo.entrada}
         placeholder="Senha"
@@ -76,30 +79,27 @@ const estilo = StyleSheet.create({
     height: 250,
     marginBottom: 1,
   },
-  nomeRef: {
-    marginBottom: 3,
-    fontSize: 20,
-    fontWeight: 'bold',
-    paddingRight: 325,
-  },
   entrada: {
     width: '100%',
+    height: 45,
     padding: 10,
     borderColor: 'gray',
+    backgroundColor: '#fff',
     borderWidth: 1,
     borderRadius: 10,
     marginBottom: 10,
-    backgroundColor: '#fff',
-    fontSize: 15,
+    fontSize: 16,
   },
   btnEntrar: {
     width: "100%",
-    backgroundColor: '#004a55',
-    borderColor: 'black',
-    alignItems: 'center',
+    height: 45,
     padding: 10,
+    borderColor: 'black',
+    backgroundColor: '#004a55',
+    alignItems: 'center',
     borderWidth: 1,
     borderRadius: 10,
+    marginTop: 2,
   },
   btnEntrarTexto: {
     color: 'white',
