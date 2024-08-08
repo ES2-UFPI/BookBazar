@@ -91,6 +91,14 @@ DATABASES = {
         'PASSWORD': '12345678',
         'HOST': '127.0.0.1',
         'PORT': '3306'
+    },
+    'test':{
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'test_bookbazar',
+        'USER': 'root',
+        'PASSWORD': '12345678',
+        'HOST': '127.0.0.1',
+        'PORT': '3306'
     }
 }
 

@@ -8,6 +8,10 @@ from appbookbazar.models import *
 from django.shortcuts import render
 from django.contrib import messages
 from django.contrib.sessions.models import Session
+from django.shortcuts import get_object_or_404
+from datetime import datetime
+from django.db.models import Q
+from .proxies.login_proxy import LoginProxy
 
 class Usuario_ViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
@@ -15,7 +19,7 @@ class Usuario_ViewSet(viewsets.ModelViewSet):
     serializer_class = Usuario_Serializer
 
 @api_view(['POST'])
-def Cadastrar_Anuncio(request):
+def cadastrar_anuncio(request):
     serializer = Cadastrar_Anuncio_Serializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -23,7 +27,7 @@ def Cadastrar_Anuncio(request):
     return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
-def Pesquisar_Anuncios(request):
+def pesquisar_anuncios(request):
     search_query = request.query_params.get('search', '')
     filter_type = request.query_params.get('filter', '')
 
@@ -51,7 +55,7 @@ def Pesquisar_Anuncios(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-def Visualizar_Anuncio(request):
+def visualizar_anuncio_por_id(request):
     id_anuncio = request.GET.get('id_anuncio', None)
 
     if id_anuncio:
@@ -74,9 +78,30 @@ def chatPage(request):
     }
     return render(request, "appbookbazar/novoChat.html", context)
 
+def validar_usuario(username, email):
+    if Credentials.objects.filter(username=username).exists():
+        return {'error': 'Nome de Usuário Já Cadastrado'}, status.HTTP_400_BAD_REQUEST
+    if Credentials.objects.filter(email=email).exists():
+        return {'error': 'E-mail Já Cadastrado'}, status.HTTP_400_BAD_REQUEST
+    return None, None
+
+def salvar_usuario(user_data, credentials_data):
+    serializer_usuario = Usuario_Serializer(data=user_data)
+    if serializer_usuario.is_valid():
+        user = serializer_usuario.save()
+        credentials_data['cpf_usuario'] = user.cpf_usuario
+        credentials_data['email'] = user.email
+        serializer_credentials = Credentials_Serializer(data=credentials_data)
+        if serializer_credentials.is_valid():
+            serializer_credentials.save()
+            return {
+                'credentials': serializer_credentials.data,
+                'usuario': serializer_usuario.data
+            }, status.HTTP_201_CREATED
+    return None, status.HTTP_400_BAD_REQUEST
+
 @api_view(['POST'])
-def Registrar_Usuario(request):
-    # Extrair dados do corpo da requisição
+def registrar_usuario(request):
     username = request.data.get('nome_usuario')
     email = request.data.get('email')
     senha = request.data.get('senha')
@@ -85,14 +110,12 @@ def Registrar_Usuario(request):
     data_nascimento = request.data.get('data_nascimento')
     telefone = request.data.get('telefone')
 
-    # Verificar se o nome de usuário já está cadastrado
-    if Credentials.objects.filter(username=username).exists():
-        return Response({'error': 'Nome de Usuário Já Cadastrado'}, status=status.HTTP_400_BAD_REQUEST)
-    # Verificar se o e-mail já está cadastrado
-    if Credentials.objects.filter(email=email).exists():
-        return Response({'error': 'E-mail Já Cadastrado'}, status=status.HTTP_400_BAD_REQUEST)
+    # Validação
+    error_response, error_status = validar_usuario(username, email)
+    if error_response:
+        return Response(error_response, status=error_status)
 
-    # Dados para o modelo Usuario
+    # Dados para o modelo Usuario e Credentials
     user_data = {
         'cpf_usuario': cpf_usuario,
         'nome': nome,
@@ -101,66 +124,31 @@ def Registrar_Usuario(request):
         'email': email,
     }
     
-    # Dados para o modelo Credentials
     credentials_data = {
         'username': username,
         'senha': senha,
         'cpf_usuario': cpf_usuario,
         'email': email,
     }
-    print(credentials_data)
-    # Validar e salvar o usuário
-    serializer_usuario = Usuario_Serializer(data=user_data)
-    
-    #print(serializer_usuario)
-    if serializer_usuario.is_valid():
-        
-        user = serializer_usuario.save()
-        
-        # Associar o CPF e o e-mail do usuário à credencial
-        credentials_data['cpf_usuario'] = user.cpf_usuario
-        credentials_data['email'] = user.email
-        
-        # Validar e salvar as credenciais
-        serializer_credentials = Credentials_Serializer(data=credentials_data)
-        if serializer_credentials.is_valid():
-            
-            serializer_credentials.save()
-            response_data = {
-                'credentials': serializer_credentials.data,
-                'usuario': serializer_usuario.data
-            }
-            return Response(response_data, status=status.HTTP_201_CREATED)
-        else:
-            return Response({'error': 'Erro ao Cadastrar Credenciais', 'details': serializer_credentials.errors}, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return Response({'error': 'Erro ao Cadastrar Usuário', 'details': serializer_usuario.errors}, status=status.HTTP_400_BAD_REQUEST)
- 
-@api_view(['POST'])
-def Logar_Usuario(request):
-    username = request.data.get('username', None)
-    password = request.data.get('password', None)
 
-    credentials = Credentials.objects.all()
-    credentials = credentials.filter(username=username).first()
-
-    if credentials is None:
-        return Response({'error':'Nome de Usuario nao Cadastrado'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    if password == credentials.senha:
-        request.session['isLoggedIn'] = True
-        request.session['username'] = username
-        return Response({'message': 'Login Bem Sucedido'}, status=status.HTTP_200_OK)
-    
-    return Response({'error': 'Senha Incorreta'}, status=status.HTTP_400_BAD_REQUEST)
+    # Salvar usuário e credenciais
+    response_data, status_code = salvar_usuario(user_data, credentials_data)
+    if response_data:
+        return Response(response_data, status=status_code)
+    return Response({'error': 'Erro ao Cadastrar Usuário ou Credenciais'}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-def Logout_Usuario(request):
+def logar_usuario(request):
+    proxy = LoginProxy(request)
+    return proxy._authenticate_user()
+
+@api_view(['GET'])
+def logout_usuario(request):
     request.session.flush()
     return Response({'message': 'Logout Bem Sucedido'}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-def Check_Login(request):
+def check_login(request):
     if request.session.get('isLoggedIn'):
         username = request.session.get('username')
         data = {"username": username}
@@ -169,77 +157,57 @@ def Check_Login(request):
     return Response({'error': 'Usuario nao Logado'}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-def Comentar(request):
-    if request.session.get('isLoggedIn'):
-        serializer = Comentario_Serializer(data=request.data)
-        
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
-        return Response({'error': 'Erro ao Comentar', 'details': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+def comentar(request):
+    print("Dados recebidos:", request.data)
 
+    serializer = Comentario_Serializer(data=request.data)
+        
+    validar_e_salvar(serializer, status.HTTP_201_CREATED, 'Usuario nao Logado')
+
+    # Extracao de Metodo
+    '''    
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
     return Response({'error': 'Usuario nao Logado'}, status=status.HTTP_400_BAD_REQUEST)  
+    '''
 
 @api_view(['GET'])
-def Visualizar_Comentarios(request):
-    id_anuncio = request.data.get('id_anuncio', None)
-
-    id_anuncio = Comentario.objects.filter(id_anuncio=id_anuncio)
-    comentario_serializer = Comentario_Serializer(id_anuncio, context={'request':request})
-
+def visualizar_comentarios(request):
+    id_anuncio = request.GET.get('id_anuncio', None)
+    if id_anuncio is None:
+        return Response({'erro': 'ID do anúncio não fornecido'}, status=status.HTTP_400_BAD_REQUEST)
+    
     try:
-        return Response(comentario_serializer, status=status.HTTP_200_OK)
-    except:
-        return Response({'erro': 'Erro ao Recuperar Comentarios', 'details': comentario_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        comentarios = Comentario.objects.filter(id_anuncio=id_anuncio)
+        comentario_serializer = Comentario_Serializer(comentarios, many=True, context={'request': request})
+        response_data = comentario_serializer.data
+        return Response(comentario_serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'erro': 'Erro ao recuperar comentários', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     
 @api_view(['GET'])
-def Visualizar_Perfil(request):
-    username = request.data.get('username', None)
-    
+def visualizar_perfil(request):
+    username = request.query_params.get('username', None)  # Usar query_params para GET
+
     if username is not None:
+        try:
+            credenciais = Credentials.objects.get(username=username)
+            usuario = Usuario.objects.get(email=credenciais.email.email)
+        except Credentials.DoesNotExist:
+            return Response({'error': 'Credenciais não encontradas'}, status=status.HTTP_404_NOT_FOUND)
+        except Usuario.DoesNotExist:
+            return Response({'error': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
-        credenciais = Credentials.objects.get(username=username)
-
-        if credenciais is None:
-            return Response({'error': 'Credenciais nao Encontradas'}, status=status.HTTP_404_NOT_FOUND)
-
-        user_data = {
-            'email': credenciais.email.email
-        }
-
-        usuario = Usuario.objects.get(email=user_data['email'])
-        #serializer = Usuario_Serializer(usuario, context={'request':request})
-        #return Response(serializer.data, status=status.HTTP_200_OK)
-
-        if request.session.get('isLoggedIn') and username == request.session['username']:
-            response_data = {
-                'username': credenciais.username,
-                'password': credenciais.senha,
-                'cpf_usuario': credenciais.cpf_usuario.cpf_usuario,
-                'email': credenciais.email.email,
-                'nome': usuario.nome,
-                'data_nascimento': usuario.data_nascimento,
-                'telefone': usuario.telefone
-            }
-
-            return Response(response_data, status=status.HTTP_200_OK)
+        serializer = Usuario_Serializer(usuario, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
-        if request.session.get('isLoggedIn') and username != request.session['username']:
-            response_data = {
-                'username': credenciais.username,
-                'email': credenciais.email.email,
-                'nome': usuario.nome,
-            }
-            return Response(response_data, status=status.HTTP_200_OK)
-    
-        return Response({'erro': 'Erro ao Recuperar Perfil'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    return Response({'erro': 'Username nao Provido'}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'error': 'Username não fornecido'}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-def Alterar_Cadastro(request):
+def alterar_cadastro(request):
     if request.session.get('isLoggedIn'):
         new_username = request.data.get('username', None)
         new_password = request.data.get('password', None)
@@ -249,6 +217,8 @@ def Alterar_Cadastro(request):
         new_phone = request.data.get('telefone', None)
 
         credentials_object = Credentials.objects.get(username=request.session['username'])
+
+        old_username = request.session.get('username')
 
         email = credentials_object.email.email
 
@@ -266,14 +236,22 @@ def Alterar_Cadastro(request):
             'email': new_email
         }
 
-        credential_serializer = Credentials_Update_Serializer(credentials_object, data=credential_update_data, partial=True)
-        usuario_serializer = Usuario_Update_Serializer(usuario_object, data=usuario_update_data, partial=True)
+        usuario_serializer = Usuario_Update_Serializer(usuario_object, data=usuario_update_data)
+
+        credentials_object.email.email = new_email
+        credentials_object.save()
 
         if usuario_serializer.is_valid():
+            usuario = usuario_serializer.save()
+            credential_update_data['email'] = usuario.email
+            
+            credential_serializer = Credentials_Update_Serializer(credentials_object, data=credential_update_data, partial=True)
             if credential_serializer.is_valid():
-                usuario_serializer.save()
                 credential_serializer.save()
                 request.session['username'] = new_username
+
+                old_credentials = Credentials.objects.filter(username=old_username)
+                old_credentials.delete()
 
                 response_data = {
                     'credential': credential_serializer.data,
@@ -284,3 +262,89 @@ def Alterar_Cadastro(request):
         return Response({'error': 'Usuario Serializer Error', 'details': usuario_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response({'error':'Erro na Alteracao de Cadastro'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def enviar_mensagem(request):
+    
+    sender_username = request.data.get('sender_username')
+    receiver_username = request.data.get('receiver_username')
+    conteudo_mensagem = request.data.get('conteudo_mensagem')
+
+    if sender_username and receiver_username and conteudo_mensagem:
+        horario_mensagem = datetime.now()
+
+        mensagem_data = {
+            "sender_username": sender_username,
+            "receiver_username": receiver_username,
+            #"chat_id": None,  # O campo chat_id pode ser mantido como None se não estiver usando mais
+            "horario_mensagem": horario_mensagem,
+            "conteudo_mensagem": conteudo_mensagem
+        }
+        print(mensagem_data)
+        serializer_mensagem = Mensagem_Serializer(data=mensagem_data)
+
+        validar_e_salvar(serializer_mensagem, status.HTTP_200_OK, 'Mensagem Serializer Error')
+
+        # Extracao de Metodo
+        '''
+        if serializer_mensagem.is_valid():
+            serializer_mensagem.save()
+            response_data = {'mensagem': serializer_mensagem.data}
+            return Response(response_data, status=status.HTTP_200_OK)
+        return Response({'error': 'Mensagem Serializer Error', 'details': serializer_mensagem.errors}, status=status.HTTP_400_BAD_REQUEST)
+        '''
+    return Response({'error': 'Dados insuficientes'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def recuperar_mensagens(request):
+    sender_username = request.query_params.get('sender_username')
+    receiver_username = request.query_params.get('receiver_username')
+
+    if sender_username and receiver_username:
+        mensagens_recuperadas = Mensagem.objects.filter(
+            (Q(sender_username=sender_username) & Q(receiver_username=receiver_username)) |
+            (Q(sender_username=receiver_username) & Q(receiver_username=sender_username))
+        ).order_by('horario_mensagem')
+
+        serializer_mensagem = Mensagem_Serializer(mensagens_recuperadas, many=True, context={'request': request})
+        print(mensagens_recuperadas)
+        return Response(serializer_mensagem.data, status=status.HTTP_200_OK)
+    
+    return Response({'error': 'Dados insuficientes'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def recuperar_chats(request):
+    username = request.query_params.get('username')
+    if username:
+        # Obter todos os chats onde o usuário é o remetente
+        chats_from_sender = Mensagem.objects.filter(sender_username=username).values('receiver_username').distinct()
+        # Obter todos os chats onde o usuário é o destinatário
+        chats_from_receiver = Mensagem.objects.filter(receiver_username=username).values('sender_username').distinct()
+
+        # Combine os dois QuerySets usando `union()`
+        combined_chats = chats_from_sender.union(chats_from_receiver)
+
+        # Cria um conjunto para armazenar usernames únicos
+        unique_usernames = set()
+
+        for chat in combined_chats:
+            if 'receiver_username' in chat:
+                unique_usernames.add(chat['receiver_username'])
+            if 'sender_username' in chat:
+                unique_usernames.add(chat['sender_username'])
+
+        # Remove o próprio username da lista de usuários
+        unique_usernames.discard(username)
+
+        # Converte o conjunto de usernames em uma lista de dicionários
+        chat_list = [{'username': user} for user in unique_usernames]
+
+        return Response(chat_list, status=status.HTTP_200_OK)
+
+    return Response({'error': 'Dados insuficientes'}, status=status.HTTP_400_BAD_REQUEST)
+
+def validar_e_salvar(serializer, sucesso_status, mensagem_erro):
+    if serializer.is_valid():
+        return Response(serializer.data, status=sucesso_status)
+    return Response({'error': mensagem_erro, 'details': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
